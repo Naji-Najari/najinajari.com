@@ -1,67 +1,84 @@
 "use client";
 
-import { FileText, Award, BookOpen } from "lucide-react";
-import FramerWrapper from "@/components/animation/framer-wrapper";
+import { Bot, Search, Activity, Cpu } from "lucide-react";
+import { BlurFade } from "@/components/ui/blur-fade";
+import { MagicCard } from "@/components/ui/magic-card";
 
-const stats = [
-  { icon: FileText, value: "4", label: "Publications" },
-  { icon: Award, value: "2", label: "Patents" },
-  { icon: BookOpen, value: "Ph.D.", label: "Machine Learning" },
+const services = [
+  {
+    icon: Bot,
+    title: "AI Agents",
+    description:
+      "I design multi-agent systems that go beyond chatbots. Agents that call your APIs, query your data, and execute real business logic. Built to run 24/7, not just during a demo.",
+    keywords: "LangGraph, Google ADK, FastAPI, MCP",
+  },
+  {
+    icon: Search,
+    title: "RAG Pipelines",
+    description:
+      "I build retrieval systems that give your users accurate answers from your own documents. Hybrid search, reranking, chunking strategies, and proper evaluation to avoid hallucinations.",
+    keywords: "RAG, Hybrid Search, LangChain",
+  },
+  {
+    icon: Activity,
+    title: "LLM Evaluation",
+    description:
+      "I set up tracing, LLM-as-a-judge scoring, and human review pipelines so you can measure your AI quality and improve it continuously.",
+    keywords: "Langfuse, LLM-as-a-Judge, HITL",
+  },
+  {
+    icon: Cpu,
+    title: "Model Fine-tuning",
+    description:
+      "When a generic model isn't enough, I fine-tune open-source LLMs on your data. Custom classifiers, domain-specific generation, multilingual NLP. From training to serving.",
+    keywords: "LoRA, PEFT, vLLM, HuggingFace",
+  },
 ];
 
 export default function About() {
   return (
-    <section id="about" className="py-20 md:py-28 px-6 lg:px-20">
+    <section id="about" className="py-28 md:py-36 px-6 lg:px-20">
       <div className="max-w-6xl mx-auto">
-        <div className="grid lg:grid-cols-[1fr_auto] gap-12 items-start">
-          <div className="space-y-6">
-            <FramerWrapper x={-60} delay={0.1}>
-              <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-                At <span className="text-primary-sky font-semibold">Brevo</span>, I work on a multi-agent AI platform used by end-users and
-                internal teams: RAG pipelines for documentation Q&A, CRM contact
-                management agents, campaign analytics agents. Built with LangGraph
-                (migrated to Google ADK), served via FastAPI, deployed on
-                Kubernetes, monitored with Langfuse.
-              </p>
-            </FramerWrapper>
-
-            <FramerWrapper x={-60} delay={0.2}>
-              <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-                Before that: I led a team of data scientists and engineers at{" "}
-                <span className="text-primary-sky font-semibold">Forvia</span>{" "}
-                (world&apos;s 4th largest automotive supplier): predictive
-                maintenance, manufacturing quality. At{" "}
-                <span className="text-primary-sky font-semibold">Orange</span>,
-                I applied my PhD research to anomaly detection on telecom
-                network traffic at scale.
-              </p>
-            </FramerWrapper>
-
-            <FramerWrapper x={-60} delay={0.3}>
-              <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-                PhD: Transformer-based unsupervised anomaly detection. 4
-                published papers (ECML-PKDD, IEEE), 2 international patents. I
-                went from writing the papers to deploying the models.
-              </p>
-            </FramerWrapper>
+        <BlurFade delay={0.1} inView>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground heading-underline inline-block">
+              About
+            </h2>
+            <p className="mt-6 text-base text-muted-foreground max-w-2xl mx-auto">
+              Senior AI Engineer with a PhD in Machine Learning. I help companies
+              ship AI agents, RAG systems, and LLM-powered products to production.
+            </p>
           </div>
+        </BlurFade>
 
-          <FramerWrapper x={60} delay={0.3} className="flex flex-row lg:flex-col gap-6">
-            {stats.map((stat) => (
-              <div
-                key={stat.label}
-                className="flex flex-col items-center gap-2 p-5 rounded-xl border-2 border-border bg-card hover:border-primary-sky/50 transition-colors duration-300"
+        <div className="mb-16" />
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {services.map((item, index) => (
+            <BlurFade key={item.title} delay={0.15 + index * 0.08} inView className="h-full">
+              <MagicCard
+                className="h-full min-h-[280px] rounded-xl"
+                gradientColor="#2563eb10"
+                gradientFrom="#2563eb"
+                gradientTo="#3b82f6"
               >
-                <stat.icon className="size-6 text-primary-sky" />
-                <span className="text-2xl font-bold text-foreground">
-                  {stat.value}
-                </span>
-                <span className="text-xs text-muted-foreground text-center">
-                  {stat.label}
-                </span>
-              </div>
-            ))}
-          </FramerWrapper>
+                <div className="p-6 flex flex-col h-full">
+                  <div className="flex items-center gap-2 mb-3">
+                    <item.icon className="size-5 text-primary-sky" />
+                    <h3 className="text-base font-bold text-foreground">
+                      {item.title}
+                    </h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed flex-1">
+                    {item.description}
+                  </p>
+                  <p className="mt-4 text-xs text-neutral-400 dark:text-neutral-500">
+                    {item.keywords}
+                  </p>
+                </div>
+              </MagicCard>
+            </BlurFade>
+          ))}
         </div>
       </div>
     </section>
