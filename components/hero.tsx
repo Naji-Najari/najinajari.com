@@ -116,7 +116,7 @@ export default function Hero() {
           <a
             href="/CV_Naji_NAJARI.pdf"
             download
-            className="inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors"
+            className="btn-3d inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
           >
             <Download className="size-4" />
             Download CV
@@ -125,7 +125,7 @@ export default function Hero() {
         <FramerWrapper delay={0.6} y={50}>
           <a
             href="mailto:najarinaji2015@gmail.com"
-            className="inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors"
+            className="btn-3d inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
           >
             <Mail className="size-4" />
             Email
@@ -136,7 +136,7 @@ export default function Hero() {
             href="https://www.linkedin.com/in/naji-najari"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors"
+            className="btn-3d inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
           >
             <img src={logoUrl("linkedin.com")} alt="LinkedIn" className="size-4 rounded-sm" />
             LinkedIn
@@ -147,7 +147,7 @@ export default function Hero() {
             href="https://github.com/Naji-Najari"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors"
+            className="btn-3d inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
           >
             <img src={logoUrl("github.com")} alt="GitHub" className="size-4 rounded-sm" />
             GitHub
@@ -158,7 +158,7 @@ export default function Hero() {
             href="https://scholar.google.com/citations?user=rkgpg1gAAAAJ"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors"
+            className="btn-3d inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
           >
             <img src={logoUrl("scholar.google.com")} alt="Scholar" className="size-4 rounded-sm" />
             Scholar
