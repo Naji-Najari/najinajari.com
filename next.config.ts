@@ -7,10 +7,6 @@ const nextConfig: NextConfig = {
   // Proxy Aptabase requests through our domain to bypass adblockers
   rewrites: async () => [
     {
-      source: "/api/v0/:path*",
-      destination: "https://eu.aptabase.com/api/v0/:path*",
-    },
-    {
       source: "/ingest/static/:path*",
       destination: "https://eu-assets.i.posthog.com/static/:path*",
     },

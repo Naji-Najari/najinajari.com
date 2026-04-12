@@ -8,7 +8,7 @@ export function AptabaseClient({ children }: { children: React.ReactNode }) {
   if (!appKey) return <>{children}</>;
 
   return (
-    <AptabaseProvider appKey={appKey} options={{ apiUrl: "/api/v0" }}>
+    <AptabaseProvider appKey={appKey}>
       <PageTracker />
       {children}
     </AptabaseProvider>
