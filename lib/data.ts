@@ -10,6 +10,11 @@ export const navItems = [
 
 export const socialLinks = [
   {
+    platform: "Email",
+    url: "mailto:najarinaji2015@gmail.com",
+    icon: "Mail",
+  },
+  {
     platform: "LinkedIn",
     url: "https://www.linkedin.com/in/naji-najari",
     icon: "Linkedin",
@@ -23,11 +28,6 @@ export const socialLinks = [
     platform: "Google Scholar",
     url: "https://scholar.google.com/citations?user=rkgpg1gAAAAJ",
     icon: "GraduationCap",
-  },
-  {
-    platform: "Email",
-    url: "mailto:najarinaji2015@gmail.com",
-    icon: "Mail",
   },
 ] as const;
 

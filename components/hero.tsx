@@ -1,13 +1,33 @@
 "use client";
 
-import { Mail, ChevronDown, Mouse } from "lucide-react";
+import { Mail, ChevronDown, Mouse, Download } from "lucide-react";
 import { FaLinkedinIn, FaGithub, FaGraduationCap } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { socialLinks } from "@/lib/data";
 import FramerWrapper from "@/components/animation/framer-wrapper";
+import { TextEffect } from "@/components/animation/text-effect";
 import TextRotator from "@/components/animation/text-rotator";
 import HackerBtn from "@/components/animation/hacker-btn";
+
+const stackTags = [
+  { name: "LangGraph", domain: "langchain.com" },
+  { name: "Google ADK", domain: "google.com" },
+  { name: "RAG", domain: null },
+  { name: "Langfuse", domain: "langfuse.com" },
+  { name: "FastAPI", domain: "fastapi.tiangolo.com" },
+  { name: "MCP", domain: "anthropic.com" },
+  { name: "GCP", domain: "cloud.google.com" },
+  { name: "AWS", domain: "aws.amazon.com" },
+  { name: "Kubernetes", domain: "kubernetes.io" },
+  { name: "Palantir", domain: "palantir.com" },
+  { name: "Python", domain: "python.org" },
+  { name: "MLFlow", domain: "mlflow.org" },
+  { name: "HuggingFace", domain: "huggingface.co" },
+];
+
+const logoUrl = (domain: string) =>
+  `https://img.logo.dev/${domain}?token=${process.env.NEXT_PUBLIC_LOGO_DEV_API_KEY}&size=64`;
 
 const iconMap: Record<string, React.ElementType> = {
   Linkedin: FaLinkedinIn,
@@ -20,84 +40,67 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center px-4 sm:px-10 lg:px-40"
+      className="relative min-h-screen flex items-center px-6 sm:px-12 lg:px-40 pt-16 pb-32"
     >
-      <div className="w-full flex flex-col lg:flex-row items-center gap-10 lg:gap-20">
+      <div className="w-full flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
         {/* LEFT — Text & Actions */}
         <FramerWrapper
-          className="flex-1 flex flex-col justify-start gap-6"
+          className="flex-1"
           y={0}
           x={-100}
         >
-          <h3 className="text-2xl max-sm:text-xl text-muted-foreground">
-            My name is
-          </h3>
-
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-primary heading-underline whitespace-nowrap leading-tight">
+          {/* Name */}
+          <TextEffect
+            per="char"
+            preset="fade-in-blur"
+            delay={0.3}
+            speedReveal={1.5}
+            as="h1"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-primary heading-underline whitespace-nowrap"
+          >
             Naji Najari, Ph.D.
-          </h1>
+          </TextEffect>
 
-          <div className="pt-2">
+          {/* Role — generous spacing from name */}
+          <div className="mt-8">
             <TextRotator />
           </div>
 
-          <p className="text-base sm:text-lg text-muted-foreground max-w-lg leading-relaxed">
-            I build AI systems that actually work in production.
+          {/* Separator line */}
+          <div className="mt-6 w-full max-w-xs h-px bg-border" />
+
+          {/* Description */}
+          <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-8">
+            Building multi-agent platforms, RAG pipelines, and LLM-powered
+            products at Brevo.
+            <br />
+            PhD in unsupervised anomaly detection.
           </p>
 
-          <div className="flex flex-wrap gap-2">
-            {["LangGraph", "Google ADK", "RAG", "Langfuse", "FastAPI", "MCP", "GCP", "AWS", "Kubernetes", "Palantir"].map((tag) => (
+          {/* Stack tags */}
+          <div className="mt-8 flex flex-wrap gap-2 max-w-2xl">
+            {stackTags.map((tag) => (
               <span
-                key={tag}
-                className="text-xs font-medium px-2.5 py-1 rounded-full border border-border text-muted-foreground"
+                key={tag.name}
+                className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors cursor-default"
               >
-                {tag}
+                {tag.domain && (
+                  <img
+                    src={logoUrl(tag.domain)}
+                    alt={tag.name}
+                    className="size-4 rounded-sm"
+                  />
+                )}
+                {tag.name}
               </span>
             ))}
           </div>
 
-          <div className="h-fit w-full py-4 flex gap-4">
-            {socialLinks.map((link, i) => {
-              const Icon = iconMap[link.icon];
-              return (
-                <FramerWrapper key={link.platform} delay={0.55 + i * 0.125} y={50}>
-                  <a
-                    href={link.url}
-                    target={
-                      link.url.startsWith("mailto:") ? undefined : "_blank"
-                    }
-                    rel="noopener noreferrer"
-                    className={cn(
-                      buttonVariants({ variant: "outline", size: "icon" })
-                    )}
-                    aria-label={link.platform}
-                  >
-                    <Icon className="size-4" />
-                  </a>
-                </FramerWrapper>
-              );
-            })}
-          </div>
-
-          <div className="flex gap-3">
-            <HackerBtn label="Download CV" href="/CV_Naji_NAJARI.pdf" />
-            <button
-              onClick={() =>
-                document
-                  .getElementById("contact")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-              className="inline-flex items-center gap-2 rounded-lg border border-border text-sm font-medium px-4 py-2 text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-            >
-              <Mail className="size-4" />
-              Contact me
-            </button>
-          </div>
         </FramerWrapper>
 
-        {/* RIGHT — Photo */}
+        {/* RIGHT — Photo + Buttons */}
         <FramerWrapper
-          className="h-full w-[47%] relative hidden lg:flex items-center justify-end"
+          className="hidden lg:flex flex-col items-center gap-6 shrink-0"
           y={0}
           x={100}
         >
@@ -106,6 +109,62 @@ export default function Hero() {
             alt="Naji Najari"
             className="w-72 h-80 rounded-2xl border-2 border-border shadow-lg object-cover"
           />
+        </FramerWrapper>
+      </div>
+
+      {/* Actions — centered below both sections */}
+      <div className="absolute bottom-32 left-1/2 -translate-x-1/2 flex items-center gap-3">
+        <FramerWrapper delay={0.5} y={50}>
+          <a
+            href="/CV_Naji_NAJARI.pdf"
+            download
+            className="inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors"
+          >
+            <Download className="size-4" />
+            Download CV
+          </a>
+        </FramerWrapper>
+        <FramerWrapper delay={0.6} y={50}>
+          <a
+            href="mailto:najarinaji2015@gmail.com"
+            className="inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors"
+          >
+            <Mail className="size-4" />
+            Email
+          </a>
+        </FramerWrapper>
+        <FramerWrapper delay={0.7} y={50}>
+          <a
+            href="https://www.linkedin.com/in/naji-najari"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors"
+          >
+            <img src={logoUrl("linkedin.com")} alt="LinkedIn" className="size-4 rounded-sm" />
+            LinkedIn
+          </a>
+        </FramerWrapper>
+        <FramerWrapper delay={0.8} y={50}>
+          <a
+            href="https://github.com/Naji-Najari"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors"
+          >
+            <img src={logoUrl("github.com")} alt="GitHub" className="size-4 rounded-sm" />
+            GitHub
+          </a>
+        </FramerWrapper>
+        <FramerWrapper delay={0.9} y={50}>
+          <a
+            href="https://scholar.google.com/citations?user=rkgpg1gAAAAJ"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors"
+          >
+            <img src={logoUrl("scholar.google.com")} alt="Scholar" className="size-4 rounded-sm" />
+            Scholar
+          </a>
         </FramerWrapper>
       </div>
 
