@@ -1,91 +1,114 @@
 "use client";
 
-import { ExternalLink, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
-import { Badge } from "@/components/ui/badge";
 import { projects } from "@/lib/data";
-import FramerWrapper from "@/components/animation/framer-wrapper";
+import { BlurFade } from "@/components/ui/blur-fade";
+import { MagicCard } from "@/components/ui/magic-card";
+
+const logoUrl = (domain: string) =>
+  `https://img.logo.dev/${domain}?token=${process.env.NEXT_PUBLIC_LOGO_DEV_API_KEY}&size=64`;
+
+const tagLogos: Record<string, string> = {
+  LangGraph: "langchain.com",
+  RAG: "",
+  "PostgreSQL pgvector": "postgresql.org",
+  FastAPI: "fastapi.tiangolo.com",
+  MCP: "anthropic.com",
+  GCP: "cloud.google.com",
+  Docker: "docker.com",
+  vLLM: "vllm.ai",
+  LoRA: "",
+  Kubernetes: "kubernetes.io",
+  Prometheus: "prometheus.io",
+};
 
 export default function Projects() {
   return (
     <section id="projects" className="py-20 md:py-28 px-6 lg:px-20">
       <div className="max-w-6xl mx-auto">
-        <FramerWrapper y={-20} delay={0.1}>
-          <h2 className="text-3xl font-bold text-foreground mb-4 heading-underline">
-            Projects
-          </h2>
-        </FramerWrapper>
-
-        <FramerWrapper x={60} delay={0.2}>
-          <p className="text-muted-foreground mb-12 max-w-2xl">
-            Production systems and open-source tools I&apos;ve built.
-          </p>
-        </FramerWrapper>
+        <BlurFade delay={0.1} inView>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-foreground heading-underline inline-block">
+              Projects
+            </h2>
+          </div>
+        </BlurFade>
 
         <div className="grid md:grid-cols-2 gap-6">
           {projects.map((project, index) => (
-            <FramerWrapper
-              key={project.title}
-              scale={0.9}
-              delay={0.15 + index * 0.1}
-            >
-              <div className="group relative bg-card rounded-xl p-6 border-2 border-border hover:border-primary-sky/50 hover:shadow-lg transition-all duration-300 flex flex-col h-full">
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary-sky transition-colors">
-                    {project.title}
-                  </h3>
-                  {project.comingSoon && (
-                    <Badge
-                      variant="outline"
-                      className="text-xs italic shrink-0 border-primary-sky/30 text-primary-sky"
-                    >
-                      Coming Soon
-                    </Badge>
-                  )}
-                </div>
+            <BlurFade key={project.title} delay={0.1 + index * 0.1} inView className="h-full">
+              <MagicCard
+                className="h-full rounded-xl"
+                gradientColor="#2563eb08"
+                gradientFrom="#2563eb"
+                gradientTo="#3b82f6"
+              >
+                <div className="p-6 flex flex-col h-full">
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <h3 className="text-base font-bold text-foreground">
+                      {project.title}
+                    </h3>
+                    {project.comingSoon && (
+                      <span className="text-xs italic text-primary-sky border border-primary-sky/30 rounded-lg px-2 py-0.5 shrink-0 ml-2">
+                        Coming Soon
+                      </span>
+                    )}
+                  </div>
 
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5 flex-1">
-                  {project.description}
-                </p>
+                  {/* Description */}
+                  <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-5">
+                    {project.description}
+                  </p>
 
-                <div className="flex flex-wrap gap-2 mb-5">
-                  {project.tags.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="secondary"
-                      className="text-xs font-medium border border-border"
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
+                  {/* Tags with logos */}
+                  <div className="flex flex-wrap gap-2 mb-5">
+                    {project.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-800 text-muted-foreground"
+                      >
+                        {tagLogos[tag] && (
+                          <img
+                            src={logoUrl(tagLogos[tag])}
+                            alt={tag}
+                            className="size-3.5 rounded-sm"
+                          />
+                        )}
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
 
-                <div className="flex gap-3">
-                  {project.liveUrl && (
-                    <a
-                      href={project.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-sky hover:underline group/link"
-                    >
-                      Visit site
-                      <ArrowUpRight className="size-4 transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />
-                    </a>
-                  )}
-                  {project.githubUrl && (
-                    <a
-                      href={project.githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary-sky transition-colors"
-                    >
-                      <FaGithub className="size-4" />
-                      GitHub
-                    </a>
-                  )}
+                  {/* Links */}
+                  <div className="flex gap-4">
+                    {project.liveUrl && (
+                      <a
+                        href={project.liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-sky hover:underline group/link"
+                      >
+                        Visit site
+                        <ArrowUpRight className="size-4 transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />
+                      </a>
+                    )}
+                    {project.githubUrl && (
+                      <a
+                        href={project.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary-sky transition-colors"
+                      >
+                        <FaGithub className="size-4" />
+                        GitHub
+                      </a>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </FramerWrapper>
+              </MagicCard>
+            </BlurFade>
           ))}
         </div>
       </div>

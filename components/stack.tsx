@@ -2,31 +2,53 @@
 
 import { stackCategories } from "@/lib/data";
 import { BlurFade } from "@/components/ui/blur-fade";
-import { Marquee } from "@/components/ui/marquee";
+import { MagicCard } from "@/components/ui/magic-card";
+import { Brain, Cpu, Code, Cloud, Languages } from "lucide-react";
 
 const logoUrl = (domain: string) =>
   `https://img.logo.dev/${domain}?token=${process.env.NEXT_PUBLIC_LOGO_DEV_API_KEY}&size=64`;
 
-const stackWithLogos: { name: string; domain: string }[] = [
-  { name: "LangGraph", domain: "langchain.com" },
-  { name: "Google ADK", domain: "google.com" },
-  { name: "LangChain", domain: "langchain.com" },
-  { name: "Langfuse", domain: "langfuse.com" },
-  { name: "FastAPI", domain: "fastapi.tiangolo.com" },
-  { name: "Python", domain: "python.org" },
-  { name: "PyTorch", domain: "pytorch.org" },
-  { name: "HuggingFace", domain: "huggingface.co" },
-  { name: "Docker", domain: "docker.com" },
-  { name: "Kubernetes", domain: "kubernetes.io" },
-  { name: "GCP", domain: "cloud.google.com" },
-  { name: "AWS", domain: "aws.amazon.com" },
-  { name: "Palantir", domain: "palantir.com" },
-  { name: "MLFlow", domain: "mlflow.org" },
-  { name: "Prometheus", domain: "prometheus.io" },
-  { name: "Spark", domain: "spark.apache.org" },
-  { name: "TensorFlow", domain: "tensorflow.org" },
-  { name: "scikit-learn", domain: "scikit-learn.org" },
-];
+const toolLogos: Record<string, string> = {
+  LangGraph: "langchain.com",
+  "Google ADK": "google.com",
+  LangChain: "langchain.com",
+  Langfuse: "langfuse.com",
+  "LLM-as-a-Judge": "",
+  MCP: "anthropic.com",
+  vLLM: "vllm.ai",
+  LiteLLM: "litellm.ai",
+  "LoRA/QLoRA": "",
+  PEFT: "huggingface.co",
+  RAG: "",
+  PyTorch: "pytorch.org",
+  "HuggingFace Transformers": "huggingface.co",
+  "scikit-learn": "scikit-learn.org",
+  TensorFlow: "tensorflow.org",
+  "Anomaly Detection": "",
+  "Time Series": "",
+  Python: "python.org",
+  FastAPI: "fastapi.tiangolo.com",
+  Docker: "docker.com",
+  Kubernetes: "kubernetes.io",
+  SQL: "",
+  "CI/CD": "",
+  "GCP / Vertex AI": "cloud.google.com",
+  ZenML: "zenml.io",
+  MLFlow: "mlflow.org",
+  Prometheus: "prometheus.io",
+  "Spark / PySpark": "spark.apache.org",
+  AWS: "aws.amazon.com",
+  Palantir: "palantir.com",
+  Kafka: "kafka.apache.org",
+};
+
+const categoryIcons: Record<string, React.ElementType> = {
+  "AI / GenAI": Brain,
+  "ML / Deep Learning": Cpu,
+  Engineering: Code,
+  "Cloud & MLOps": Cloud,
+  Languages: Languages,
+};
 
 export default function Stack() {
   return (
@@ -40,69 +62,46 @@ export default function Stack() {
           </div>
         </BlurFade>
 
-        {/* Logo marquee */}
-        <BlurFade delay={0.2} inView>
-          <div className="relative mb-16">
-            <Marquee pauseOnHover className="[--duration:35s]">
-              {stackWithLogos.map((item) => (
-                <div
-                  key={item.name}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-card mx-1"
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {stackCategories.map((category, index) => {
+            const Icon = categoryIcons[category.label] || Code;
+            return (
+              <BlurFade key={category.label} delay={0.1 + index * 0.06} inView>
+                <MagicCard
+                  className="h-full rounded-xl"
+                  gradientColor="#2563eb08"
+                  gradientFrom="#2563eb"
+                  gradientTo="#3b82f6"
                 >
-                  <img
-                    src={logoUrl(item.domain)}
-                    alt={item.name}
-                    className="size-5 rounded-sm"
-                  />
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">
-                    {item.name}
-                  </span>
-                </div>
-              ))}
-            </Marquee>
-            <Marquee reverse pauseOnHover className="[--duration:35s] mt-3">
-              {stackWithLogos.reverse().map((item) => (
-                <div
-                  key={item.name}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-card mx-1"
-                >
-                  <img
-                    src={logoUrl(item.domain)}
-                    alt={item.name}
-                    className="size-5 rounded-sm"
-                  />
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">
-                    {item.name}
-                  </span>
-                </div>
-              ))}
-            </Marquee>
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-background to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-background to-transparent" />
-          </div>
-        </BlurFade>
-
-        {/* Categories */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {stackCategories.map((category, index) => (
-            <BlurFade key={category.label} delay={0.1 + index * 0.08} inView>
-              <div className="space-y-3">
-                <h3 className="text-sm font-bold text-primary-sky uppercase tracking-wider">
-                  {category.label}
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {category.items.map((item) => (
-                    <span
-                      key={item}
-                      className="text-xs px-2.5 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-800 text-muted-foreground hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors cursor-default"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </BlurFade>
-          ))}
+                  <div className="p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Icon className="size-4 text-primary-sky" />
+                      <h3 className="text-sm font-bold text-foreground">
+                        {category.label}
+                      </h3>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {category.items.map((item) => (
+                        <span
+                          key={item}
+                          className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-800 text-muted-foreground"
+                        >
+                          {toolLogos[item] && (
+                            <img
+                              src={logoUrl(toolLogos[item])}
+                              alt={item}
+                              className="size-3.5 rounded-sm"
+                            />
+                          )}
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </MagicCard>
+              </BlurFade>
+            );
+          })}
         </div>
       </div>
     </section>

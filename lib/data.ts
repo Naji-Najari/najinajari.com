@@ -2,9 +2,9 @@ export const navItems = [
   { id: "home", label: "Home", icon: "Home" },
   { id: "about", label: "About", icon: "User" },
   { id: "experience", label: "Experience", icon: "Briefcase" },
+  { id: "stack", label: "Stack", icon: "Layers" },
   { id: "projects", label: "Projects", icon: "Code2" },
   { id: "publications", label: "Publications", icon: "BookOpen" },
-  { id: "stack", label: "Stack", icon: "Layers" },
   { id: "contact", label: "Contact", icon: "Mail" },
 ] as const;
 
@@ -46,8 +46,8 @@ export const experiences: Experience[] = [
     company: "Brevo",
     logo: "/logos/brevo.svg",
     title: "Senior AI Engineer",
-    date: "Sep 2024 — Present",
-    location: "Paris, France · Hybrid",
+    date: "Sep 2024 — Present · 1 yr 8 mos",
+    location: "Paris, France",
     bullets: [
       "Built multiple production agents within a multi-agent AI platform used by end-users and internal teams: documentation Q&A (RAG), CRM contact management, campaign analytics and recommendation | LangChain, LangGraph, Google ADK",
       "Exposed Brevo's public APIs as MCP servers, enabling developers to use Brevo tools directly from AI coding assistants (Claude, Cursor) | FastMCP, FastAPI",
@@ -70,8 +70,8 @@ export const experiences: Experience[] = [
     company: "FORVIA",
     logo: "/logos/forvia.svg",
     title: "Senior Data Scientist — Technical Leader",
-    date: "Jan 2023 — Sep 2024",
-    location: "Paris, France · Hybrid",
+    date: "Jan 2023 — Sep 2024 · 1 yr 9 mos",
+    location: "Paris, France",
     bullets: [
       "Led a cross-functional team of 6-8 (data scientists, software engineers, front-end developers) delivering ML solutions for manufacturing plants at world's 4th largest automotive supplier",
       "Built predictive maintenance models: process parameter optimization, time series forecasting, anomaly detection",
@@ -84,7 +84,7 @@ export const experiences: Experience[] = [
     company: "Orange",
     logo: "/logos/orange.svg",
     title: "Data Scientist — PhD Researcher (CIFRE)",
-    date: "Nov 2019 — Feb 2023",
+    date: "Nov 2019 — Feb 2023 · 3 yrs 4 mos",
     location: "Grenoble, France",
     bullets: [
       "Trained and deployed robust unsupervised anomaly detection models for real-time network traffic monitoring | PyTorch, PySpark, Docker",
@@ -115,7 +115,7 @@ export const projects: Project[] = [
   {
     title: "RagMaker — Agentic RAG Platform",
     description:
-      "Co-developed an Agentic B2B SaaS platform enabling users to query multi-format documents and connect external tools via conversational AI. Hybrid Search (semantic + keyword + graph), Text-to-SQL, MCP integration, LangGraph agentic workflows.",
+      "Co-developed an Agentic B2B SaaS platform enabling users to query multi-format documents and connect external tools via conversational AI. Hybrid Search (semantic + keyword), Text-to-SQL, MCP integration, LangGraph agentic workflows.",
     tags: [
       "LangGraph",
       "RAG",
@@ -150,7 +150,7 @@ export const publications: Publication[] = [
   {
     title:
       "RESIST: Robust Transformer for Unsupervised Time Series Anomaly Detection",
-    venue: "ECML-PKDD 2022 (AALTD Workshop)",
+    venue: "ECML-PKDD 2022",
     year: 2022,
     authors: "N. Najari, S. Berlemont, G. Lefebvre, S. Duffner, C. Garcia",
     highlight: true,
@@ -179,6 +179,14 @@ export const publications: Publication[] = [
     authors: "N. Najari, S. Berlemont, G. Lefebvre, S. Duffner, C. Garcia",
     doi: "10.1109/COINS49042.2020.9191376",
     url: "https://ieeexplore.ieee.org/document/9191376",
+  },
+  {
+    title: "Robust Unsupervised Anomaly Detection",
+    venue: "PhD Thesis, INSA Lyon",
+    year: 2022,
+    authors: "N. Najari",
+    highlight: true,
+    url: "https://theses.fr/2022ISAL0124",
   },
 ];
 
@@ -216,9 +224,9 @@ export const stackCategories: StackCategory[] = [
       "LangChain",
       "RAG",
       "Langfuse",
-      "LLM-as-a-Judge",
       "MCP",
       "vLLM",
+      "LiteLLM",
       "LoRA/QLoRA",
     ],
   },
@@ -229,21 +237,21 @@ export const stackCategories: StackCategory[] = [
       "HuggingFace Transformers",
       "scikit-learn",
       "TensorFlow",
-      "Anomaly Detection",
-      "Time Series",
+      "PEFT",
     ],
   },
   {
     label: "Engineering",
-    items: ["Python", "FastAPI", "Docker", "Kubernetes", "SQL", "CI/CD"],
+    items: ["Python", "FastAPI", "Docker", "Kubernetes", "Kafka", "SQL", "CI/CD"],
   },
   {
     label: "Cloud & MLOps",
     items: [
       "GCP / Vertex AI",
+      "AWS",
+      "Palantir",
       "ZenML",
       "MLFlow",
-      "Prometheus",
       "Spark / PySpark",
     ],
   },
