@@ -72,13 +72,11 @@ export default function Hero() {
           {/* Description */}
           <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-8">
             Building multi-agent platforms, RAG pipelines, and LLM-powered
-            products at Brevo.
-            <br />
-            PhD in unsupervised anomaly detection.
+            products at Brevo. PhD in unsupervised anomaly detection.
           </p>
 
           {/* Stack tags */}
-          <div className="mt-8 flex flex-wrap gap-2 max-w-2xl">
+          <div className="mt-12 flex flex-wrap gap-2 max-w-2xl">
             {stackTags.map((tag) => (
               <span
                 key={tag.name}
