@@ -120,7 +120,7 @@ export default function Contact() {
         <div className="max-w-xl mx-auto">
           {/* Direct contact */}
           <BlurFade delay={0.15} inView>
-            <div className="grid grid-cols-3 gap-3 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
               {contactItems.map((item) => (
                 <RevealItem
                   key={item.label}
@@ -152,7 +152,7 @@ export default function Contact() {
               gradientTo="#3b82f6"
             >
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
                     placeholder="Your name"
                     value={form.name}

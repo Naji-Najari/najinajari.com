@@ -51,7 +51,7 @@ function ServiceCard({ item, index }: { item: typeof services[number]; index: nu
         className="h-full"
       >
         <MagicCard
-          className="h-full min-h-[280px] rounded-xl"
+          className="h-full md:min-h-[280px] rounded-xl"
           gradientColor="#2563eb10"
           gradientFrom="#2563eb"
           gradientTo="#3b82f6"

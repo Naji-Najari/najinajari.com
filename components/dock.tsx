@@ -54,7 +54,7 @@ function DockItem({
     return val - bounds.x - bounds.width / 2;
   });
 
-  const widthSync = useTransform(distance, [-150, 0, 150], [40, 56, 40]);
+  const widthSync = useTransform(distance, [-150, 0, 150], [36, 48, 36]);
   const width = useSpring(widthSync, {
     mass: 0.1,
     stiffness: 150,
@@ -105,7 +105,7 @@ function ThemeToggle({ mouseX }: { mouseX: MotionValue<number> }) {
     return val - bounds.x - bounds.width / 2;
   });
 
-  const widthSync = useTransform(distance, [-150, 0, 150], [40, 56, 40]);
+  const widthSync = useTransform(distance, [-150, 0, 150], [36, 48, 36]);
   const width = useSpring(widthSync, {
     mass: 0.1,
     stiffness: 150,
@@ -188,7 +188,7 @@ export default function Dock() {
     <motion.nav
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-end gap-1 px-3 py-2 bg-background/70 backdrop-blur-xl border-2 border-border rounded-2xl shadow-lg"
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-end gap-0.5 sm:gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-background/70 backdrop-blur-xl border-2 border-border rounded-2xl shadow-lg max-w-[95vw] overflow-x-auto"
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.3 }}

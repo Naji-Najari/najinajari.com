@@ -40,7 +40,7 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center px-6 sm:px-12 lg:px-40 pt-16 pb-32"
+      className="relative min-h-screen flex flex-col justify-center px-6 sm:px-12 lg:px-40 pt-20 pb-16"
     >
       <div className="w-full flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
         {/* LEFT — Text & Actions */}
@@ -56,7 +56,7 @@ export default function Hero() {
             delay={0.3}
             speedReveal={1.5}
             as="h1"
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-primary heading-underline whitespace-nowrap"
+            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-primary heading-underline"
           >
             Naji Najari, Ph.D.
           </TextEffect>
@@ -94,6 +94,30 @@ export default function Hero() {
             ))}
           </div>
 
+          {/* Actions — mobile only */}
+          <div className="mt-8 flex flex-wrap gap-2 lg:hidden">
+            <a href="/CV_Naji_NAJARI.pdf" download className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
+              <Download className="size-4" />
+              Download CV
+            </a>
+            <a href="mailto:najarinaji2015@gmail.com" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
+              <Mail className="size-4" />
+              Email
+            </a>
+            <a href="https://www.linkedin.com/in/naji-najari" target="_blank" rel="noopener noreferrer" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
+              <img src={logoUrl("linkedin.com")} alt="LinkedIn" className="size-4 rounded-sm" />
+              LinkedIn
+            </a>
+            <a href="https://github.com/Naji-Najari" target="_blank" rel="noopener noreferrer" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
+              <img src={logoUrl("github.com")} alt="GitHub" className="size-4 rounded-sm" />
+              GitHub
+            </a>
+            <a href="https://scholar.google.com/citations?user=rkgpg1gAAAAJ" target="_blank" rel="noopener noreferrer" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
+              <img src={logoUrl("scholar.google.com")} alt="Scholar" className="size-4 rounded-sm" />
+              Scholar
+            </a>
+          </div>
+
         </FramerWrapper>
 
         {/* RIGHT — Photo + Buttons */}
@@ -110,13 +134,13 @@ export default function Hero() {
         </FramerWrapper>
       </div>
 
-      {/* Actions — centered below both sections */}
-      <div className="absolute bottom-32 left-1/2 -translate-x-1/2 flex items-center gap-3">
+      {/* Actions — desktop, centered in flow */}
+      <div className="hidden lg:flex justify-center gap-3 mt-16 lg:mt-20">
         <FramerWrapper delay={0.5} y={50}>
           <a
             href="/CV_Naji_NAJARI.pdf"
             download
-            className="btn-3d inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
+            className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
           >
             <Download className="size-4" />
             Download CV
@@ -125,7 +149,7 @@ export default function Hero() {
         <FramerWrapper delay={0.6} y={50}>
           <a
             href="mailto:najarinaji2015@gmail.com"
-            className="btn-3d inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
+            className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
           >
             <Mail className="size-4" />
             Email
@@ -136,7 +160,7 @@ export default function Hero() {
             href="https://www.linkedin.com/in/naji-najari"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-3d inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
+            className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
           >
             <img src={logoUrl("linkedin.com")} alt="LinkedIn" className="size-4 rounded-sm" />
             LinkedIn
@@ -147,7 +171,7 @@ export default function Hero() {
             href="https://github.com/Naji-Najari"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-3d inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
+            className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
           >
             <img src={logoUrl("github.com")} alt="GitHub" className="size-4 rounded-sm" />
             GitHub
@@ -158,7 +182,7 @@ export default function Hero() {
             href="https://scholar.google.com/citations?user=rkgpg1gAAAAJ"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-3d inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
+            className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
           >
             <img src={logoUrl("scholar.google.com")} alt="Scholar" className="size-4 rounded-sm" />
             Scholar
@@ -171,7 +195,7 @@ export default function Hero() {
         onClick={() =>
           document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })
         }
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+        className="hidden lg:flex flex-col items-center gap-1 mt-8 text-muted-foreground hover:text-primary transition-colors cursor-pointer"
       >
         <Mouse className="size-5" />
         <ChevronDown className="size-4 animate-bounce" />
