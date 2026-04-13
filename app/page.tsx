@@ -8,12 +8,12 @@ import Stack from "@/components/stack";
 import Contact from "@/components/contact";
 import Footer from "@/components/footer";
 import Chatbot from "@/components/chatbot";
+import { GridBackground } from "@/components/grid-background";
 
 export default function Home() {
   return (
     <>
-      {/* Dot grid background */}
-      <div className="fixed inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1e3a5f_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
+      <GridBackground />
 
       <Dock />
       <main className="relative">
