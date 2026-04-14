@@ -111,17 +111,6 @@ export default function Projects() {
                         <ArrowUpRight className="size-4 transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />
                       </a>
                     )}
-                    {project.githubUrl && (
-                      <a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary-sky transition-colors"
-                      >
-                        <FaGithub className="size-4" />
-                        GitHub
-                      </a>
-                    )}
                   </div>
                 </div>
               </MagicCard>
