@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { MessageSquare, X, ArrowUp, Square, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -36,17 +36,42 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+const SESSION_STORAGE_KEY = "nn_chat_session";
+
+/**
+ * Returns a stable session identifier persisted in localStorage so that
+ * Langfuse groups every chat turn from the same browser into a single
+ * conversation trace group.
+ */
+function getOrCreateSessionId(): string {
+  if (typeof window === "undefined") return "";
+  const existing = window.localStorage.getItem(SESSION_STORAGE_KEY);
+  if (existing) return existing;
+  const fresh =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `s_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  window.localStorage.setItem(SESSION_STORAGE_KEY, fresh);
+  return fresh;
+}
+
 export default function Chatbot() {
   const t = useTranslations("chatbot");
+  const locale = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
   const [followUps, setFollowUps] = useState<string[]>([]);
+  const [sessionId, setSessionId] = useState("");
   const abortRef = useRef<AbortController | null>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    setSessionId(getOrCreateSessionId());
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     if (viewportRef.current) {
@@ -89,7 +114,11 @@ export default function Chatbot() {
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-session-id": sessionId,
+          "x-locale": locale,
+        },
         body: JSON.stringify({ messages: newMessages }),
         signal: controller.signal,
       });

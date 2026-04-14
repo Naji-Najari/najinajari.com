@@ -1,4 +1,12 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { createHash, randomUUID } from "node:crypto";
+import {
+  propagateAttributes,
+  startObservation,
+} from "@langfuse/tracing";
+
+const MODEL = "claude-haiku-4-5-20251001";
+const MAX_TOKENS = 1024;
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -77,63 +85,137 @@ PROJECTS:
 2. multi-agent-llm-stack (Coming Soon): End-to-end production ML stack with multi-agent RAG, LLM fine-tuning, vLLM serving.
 `;
 
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+/**
+ * Derives a non-reversible, short user identifier from the caller's IP.
+ * Used only to group Langfuse traces per visitor without storing the raw IP.
+ */
+function hashIp(ip: string | null): string {
+  if (!ip) return "anonymous";
+  return createHash("sha256").update(ip).digest("hex").slice(0, 16);
+}
+
 export async function POST(req: Request) {
+  let messages: ChatMessage[];
   try {
-    const { messages } = await req.json();
-
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return Response.json({ error: "Messages required" }, { status: 400 });
-    }
-
-    // Limit message length
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage.content && lastMessage.content.length > 2000) {
-      return Response.json({ error: "Message too long" }, { status: 400 });
-    }
-
-    // Keep only last 20 messages for context
-    const trimmedMessages = messages.slice(-20);
-
-    const stream = client.messages.stream({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: trimmedMessages,
-    });
-
-    const encoder = new TextEncoder();
-    const readable = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const event of stream) {
-            if (
-              event.type === "content_block_delta" &&
-              event.delta.type === "text_delta"
-            ) {
-              controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`)
-              );
-            }
-          }
-          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-          controller.close();
-        } catch (error) {
-          controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ error: "Stream error" })}\n\n`)
-          );
-          controller.close();
-        }
-      },
-    });
-
-    return new Response(readable, {
-      headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-      },
-    });
+    const body = await req.json();
+    messages = body.messages;
   } catch {
-    return Response.json({ error: "Internal server error" }, { status: 500 });
+    return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
+
+  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    return Response.json({ error: "Messages required" }, { status: 400 });
+  }
+
+  const lastMessage = messages[messages.length - 1];
+  if (lastMessage.content && lastMessage.content.length > 2000) {
+    return Response.json({ error: "Message too long" }, { status: 400 });
+  }
+
+  const trimmedMessages = messages.slice(-20);
+
+  const sessionId = req.headers.get("x-session-id") ?? randomUUID();
+  const locale = req.headers.get("x-locale") ?? "en";
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  const ip = forwardedFor?.split(",")[0]?.trim() ?? null;
+  const userId = hashIp(ip);
+
+  // propagateAttributes attaches trace-level metadata to every observation
+  // created inside the callback. We use startObservation (manual lifecycle)
+  // rather than startActiveObservation because the Response is returned
+  // before the stream finishes — we need to end() the generation ourselves
+  // once streaming completes.
+  return propagateAttributes(
+    {
+      sessionId,
+      userId,
+      tags: ["portfolio", "chatbot", locale],
+    },
+    () => {
+      const generation = startObservation(
+        "portfolio-chat",
+        {
+          input: trimmedMessages,
+          model: MODEL,
+          modelParameters: { max_tokens: MAX_TOKENS },
+        },
+        { asType: "generation" },
+      );
+
+      const stream = client.messages.stream({
+        model: MODEL,
+        max_tokens: MAX_TOKENS,
+        system: SYSTEM_PROMPT,
+        messages: trimmedMessages,
+      });
+
+      const encoder = new TextEncoder();
+      let fullOutput = "";
+
+      const readable = new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const event of stream) {
+              if (
+                event.type === "content_block_delta" &&
+                event.delta.type === "text_delta"
+              ) {
+                fullOutput += event.delta.text;
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ text: event.delta.text })}\n\n`,
+                  ),
+                );
+              }
+            }
+
+            // finalMessage carries token usage counts.
+            const finalMessage = await stream.finalMessage();
+            generation.update({
+              output: fullOutput,
+              usageDetails: {
+                input: finalMessage.usage.input_tokens,
+                output: finalMessage.usage.output_tokens,
+                total:
+                  finalMessage.usage.input_tokens +
+                  finalMessage.usage.output_tokens,
+              },
+            });
+
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+            controller.close();
+          } catch (err) {
+            const message =
+              err instanceof Error ? err.message : "stream failed";
+            generation.update({
+              level: "ERROR",
+              statusMessage: message,
+              output: fullOutput || undefined,
+            });
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ error: "Stream error" })}\n\n`,
+              ),
+            );
+            controller.close();
+          } finally {
+            generation.end();
+          }
+        },
+      });
+
+      return new Response(readable, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
+      });
+    },
+  );
 }
