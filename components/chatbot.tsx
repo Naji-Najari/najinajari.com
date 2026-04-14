@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { MessageSquare, X, ArrowUp, Square, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -11,11 +12,11 @@ interface Message {
   content: string;
 }
 
-const suggestions = [
-  { title: "Your experience", label: "Background" },
-  { title: "Your services", label: "What you offer" },
-  { title: "Your stack", label: "Technologies" },
-  { title: "Your research", label: "PhD & papers" },
+const suggestionKeys = [
+  { titleKey: "suggestion_1", labelKey: "suggestion_1_label" },
+  { titleKey: "suggestion_2", labelKey: "suggestion_2_label" },
+  { titleKey: "suggestion_3", labelKey: "suggestion_3_label" },
+  { titleKey: "suggestion_4", labelKey: "suggestion_4_label" },
 ];
 
 function CopyButton({ text }: { text: string }) {
@@ -36,6 +37,7 @@ function CopyButton({ text }: { text: string }) {
 }
 
 export default function Chatbot() {
+  const t = useTranslations("chatbot");
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -222,8 +224,8 @@ export default function Chatbot() {
                   className="h-10 w-10 rounded-full object-cover ring-2 ring-neutral-200 dark:ring-neutral-700"
                 />
                 <div className="flex flex-col">
-                  <h3 className="font-semibold text-sm">Naji&apos;s Assistant</h3>
-                  <p className="text-xs text-muted-foreground">Ask me anything</p>
+                  <h3 className="font-semibold text-sm">{t("assistant_name")}</h3>
+                  <p className="text-xs text-muted-foreground">{t("ask_anything")}</p>
                 </div>
               </div>
               <Button
@@ -240,19 +242,19 @@ export default function Chatbot() {
             <div ref={viewportRef} className="flex-1 overflow-y-auto px-4">
               {messages.length === 0 && !isStreaming ? (
                 <div className="flex flex-col h-full justify-center px-4">
-                  <p className="text-2xl font-semibold text-foreground">Hey there 👋</p>
+                  <p className="text-2xl font-semibold text-foreground">{t("welcome")}</p>
                   <p className="text-2xl text-muted-foreground/65 mb-8">
-                    Ask me anything about Naji.
+                    {t("welcome_sub")}
                   </p>
                   <div className="grid grid-cols-2 gap-2">
-                    {suggestions.map((s) => (
+                    {suggestionKeys.map((s) => (
                       <button
-                        key={s.title}
-                        onClick={() => sendMessage(s.title)}
+                        key={s.titleKey}
+                        onClick={() => sendMessage(t(s.titleKey))}
                         className="h-auto w-full items-start justify-start text-left flex flex-col gap-0.5 rounded-2xl border px-3 py-2.5 hover:bg-accent/60 transition-colors"
                       >
-                        <span className="font-medium text-sm truncate w-full">{s.title}</span>
-                        <span className="text-xs text-muted-foreground truncate w-full">{s.label}</span>
+                        <span className="font-medium text-sm truncate w-full">{t(s.titleKey)}</span>
+                        <span className="text-xs text-muted-foreground truncate w-full">{t(s.labelKey)}</span>
                       </button>
                     ))}
                   </div>
@@ -330,7 +332,7 @@ export default function Chatbot() {
                       sendMessage(input);
                     }
                   }}
-                  placeholder="Ask me anything..."
+                  placeholder={t("placeholder")}
                   rows={1}
                   className="w-full resize-none bg-transparent text-sm leading-relaxed outline-none px-4 pt-3 pb-10 placeholder:text-muted-foreground/50 min-h-[44px] max-h-[150px]"
                 />

@@ -1,18 +1,21 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ExternalLink, ShieldCheck, FileText } from "lucide-react";
 import { publications, patents } from "@/lib/data";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { MagicCard } from "@/components/ui/magic-card";
 
 export default function Publications() {
+  const t = useTranslations("publications");
+
   return (
     <section id="publications" className="py-20 md:py-28 px-6 lg:px-20">
       <div className="max-w-6xl mx-auto">
         <BlurFade delay={0.1} inView>
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-foreground heading-underline inline-block">
-              Publications & Patents
+              {t("title")}
             </h2>
           </div>
         </BlurFade>
@@ -59,7 +62,7 @@ export default function Publications() {
                           className="inline-flex items-center gap-1 text-xs font-medium text-primary-sky hover:underline"
                         >
                           <ExternalLink className="size-3" />
-                          Paper
+                          {t("read_paper")}
                         </a>
                       )}
                     </div>
@@ -75,7 +78,7 @@ export default function Publications() {
           <div className="flex items-center gap-2 mb-6">
             <ShieldCheck className="size-5 text-primary-sky" />
             <h3 className="text-lg font-bold text-foreground">
-              International Patents
+              {t("patents_title")}
             </h3>
           </div>
         </BlurFade>
@@ -97,7 +100,7 @@ export default function Publications() {
                     {patent.inventors}
                   </p>
                   <p className="text-xs text-muted-foreground mt-2">
-                    Filed: {patent.filed}
+                    {t("filed")}: {patent.filed}
                   </p>
                 </div>
               </MagicCard>

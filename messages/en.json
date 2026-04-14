@@ -1,0 +1,114 @@
+{
+  "hero": {
+    "name": "Naji Najari, Ph.D.",
+    "role_prefix": "I am a",
+    "role": "Senior AI Engineer",
+    "description": "Building multi-agent platforms, RAG pipelines, and LLM-powered products at Brevo. PhD in unsupervised anomaly detection.",
+    "download_cv": "Download CV",
+    "email": "Email"
+  },
+  "about": {
+    "title": "About",
+    "subtitle": "Senior AI Engineer with a PhD in Machine Learning. I help companies ship AI agents, RAG systems, and LLM-powered products to production.",
+    "agents_title": "AI Agents",
+    "agents_desc": "I design multi-agent systems that go beyond chatbots. Agents that call your APIs, query your data, and execute real business logic. Built to run 24/7, not just during a demo.",
+    "rag_title": "RAG Pipelines",
+    "rag_desc": "I build retrieval systems that give your users accurate answers from your own documents. Hybrid search, reranking, chunking strategies, and proper evaluation to avoid hallucinations.",
+    "eval_title": "LLM Evaluation",
+    "eval_desc": "I set up tracing, LLM-as-a-judge scoring, and human review pipelines so you can measure your AI quality and improve it continuously.",
+    "finetune_title": "Model Fine-tuning",
+    "finetune_desc": "When a generic model isn't enough, I fine-tune open-source LLMs on your data. Custom classifiers, domain-specific generation, multilingual NLP. From training to serving."
+  },
+  "experience": {
+    "title": "Experience",
+    "brevo_title": "Senior AI Engineer",
+    "brevo_date": "Sep 2024 — Present · 1 yr 8 mos",
+    "brevo_location": "Paris, France",
+    "brevo_bullets": [
+      "Built multiple production agents within a multi-agent AI platform used by end-users and internal teams: documentation Q&A (RAG), CRM contact management, campaign analytics and recommendation | LangChain, LangGraph, Google ADK",
+      "Exposed Brevo's public APIs as MCP servers, enabling developers to use Brevo tools directly from AI coding assistants (Claude, Cursor) | FastMCP, FastAPI",
+      "Implemented production-grade RAG pipelines for real-time customer query answering | Ragflow, LangChain",
+      "Integrated Langfuse for end-to-end LLM tracing and monitoring; built LLM-as-a-judge evaluation with human-in-the-loop annotation",
+      "Fine-tuned BERT for multilingual spam and fraud detection | HuggingFace Transformers, CI/CD",
+      "Trained and deployed ML audience recommendation models | ZenML, MLOps, MLFlow"
+    ],
+    "forvia_title": "Senior Data Scientist — Technical Leader",
+    "forvia_date": "Jan 2023 — Sep 2024 · 1 yr 9 mos",
+    "forvia_location": "Paris, France",
+    "forvia_bullets": [
+      "Led a cross-functional team of 6-8 (data scientists, software engineers, front-end developers) delivering ML solutions for manufacturing plants at world's 4th largest automotive supplier",
+      "Built predictive maintenance models: process parameter optimization, time series forecasting, anomaly detection",
+      "Applied LLMs for advanced text analysis on manufacturing documentation and reports",
+      "Recognized internally as Machine Learning Expert"
+    ],
+    "orange_title": "Data Scientist — PhD Researcher (CIFRE)",
+    "orange_date": "Nov 2019 — Feb 2023 · 3 yrs 4 mos",
+    "orange_location": "Grenoble, France",
+    "orange_bullets": [
+      "Trained and deployed robust unsupervised anomaly detection models for real-time network traffic monitoring | PyTorch, PySpark, Docker",
+      "Published 4 papers at top ML conferences: ECML-PKDD, IEEE COINS, AINA, SINConf",
+      "Filed 2 international patents (INPI) for IoT anomaly detection and network traffic fingerprinting",
+      "PhD thesis (CIFRE): \"Robust Unsupervised Anomaly Detection\""
+    ]
+  },
+  "projects": {
+    "title": "Projects",
+    "visit_site": "Visit site",
+    "coming_soon": "Coming Soon",
+    "ragmaker_title": "RagMaker — Agentic RAG Platform",
+    "ragmaker_desc": "Co-developed an Agentic B2B SaaS platform enabling users to query multi-format documents and connect external tools via conversational AI. Hybrid Search (semantic + keyword), Text-to-SQL, MCP integration, LangGraph agentic workflows.",
+    "multiagent_title": "multi-agent-llm-stack",
+    "multiagent_desc": "End-to-end production ML stack: multi-agent RAG with LangGraph, LLM fine-tuning (LoRA/QLoRA), vLLM serving, Docker, Kubernetes, Prometheus monitoring. Full stack, open source."
+  },
+  "publications": {
+    "title": "Publications & Patents",
+    "patents_title": "International Patents",
+    "read_paper": "Paper",
+    "filed": "Filed"
+  },
+  "stack": {
+    "title": "Stack",
+    "languages_items": ["French — Fluent", "English — Fluent", "Arabic — Native"]
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Interested in working together? Let's talk.",
+    "reach_out": "Reach out directly or fill the form.",
+    "or_form": "or fill the form",
+    "your_name": "Your name",
+    "your_email": "Your email",
+    "subject": "Subject",
+    "your_message": "Your message",
+    "send": "Send message",
+    "sending": "Sending...",
+    "sent": "Message sent!",
+    "error": "Try again"
+  },
+  "footer": {
+    "built_with": "Built with Next.js."
+  },
+  "chatbot": {
+    "assistant_name": "Naji's Assistant",
+    "ask_anything": "Ask me anything",
+    "welcome": "Hey there 👋",
+    "welcome_sub": "Ask me anything about Naji.",
+    "placeholder": "Ask me anything...",
+    "suggestion_1": "Your experience",
+    "suggestion_1_label": "Background",
+    "suggestion_2": "Your services",
+    "suggestion_2_label": "What you offer",
+    "suggestion_3": "Your stack",
+    "suggestion_3_label": "Technologies",
+    "suggestion_4": "Your research",
+    "suggestion_4_label": "PhD & papers"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "experience": "Experience",
+    "stack": "Stack",
+    "projects": "Projects",
+    "publications": "Publications",
+    "contact": "Contact"
+  }
+}

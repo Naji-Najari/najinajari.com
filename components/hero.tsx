@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import { Mail, ChevronDown, Mouse, Download } from "lucide-react";
 import { FaLinkedinIn, FaGithub, FaGraduationCap } from "react-icons/fa";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,10 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 export default function Hero() {
+  const t = useTranslations("hero");
+  const locale = useLocale();
+  const isArabic = locale === "ar";
+
   return (
     <section
       id="home"
@@ -50,16 +55,22 @@ export default function Hero() {
           x={-100}
         >
           {/* Name */}
-          <TextEffect
-            per="char"
-            preset="fade-in-blur"
-            delay={0.3}
-            speedReveal={1.5}
-            as="h1"
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-primary heading-underline"
-          >
-            Naji Najari, Ph.D.
-          </TextEffect>
+          {isArabic ? (
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-primary heading-underline">
+              {t("name")}
+            </h1>
+          ) : (
+            <TextEffect
+              per="char"
+              preset="fade-in-blur"
+              delay={0.3}
+              speedReveal={1.5}
+              as="h1"
+              className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-primary heading-underline"
+            >
+              {t("name")}
+            </TextEffect>
+          )}
 
           {/* Role — generous spacing from name */}
           <div className="mt-8">
@@ -71,8 +82,7 @@ export default function Hero() {
 
           {/* Description */}
           <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-8">
-            Building multi-agent platforms, RAG pipelines, and LLM-powered
-            products at Brevo. PhD in unsupervised anomaly detection.
+            {t("description")}
           </p>
 
           {/* Stack tags */}
@@ -98,11 +108,11 @@ export default function Hero() {
           <div className="mt-8 flex flex-wrap gap-2 lg:hidden">
             <a href="/CV_Naji_NAJARI.pdf" download className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
               <Download className="size-4" />
-              Download CV
+              {t("download_cv")}
             </a>
             <a href="mailto:najarinaji2015@gmail.com" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
               <Mail className="size-4" />
-              Email
+              {t("email")}
             </a>
             <a href="https://www.linkedin.com/in/naji-najari" target="_blank" rel="noopener noreferrer" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
               <img src={logoUrl("linkedin.com")} alt="LinkedIn" className="size-4 rounded-sm" />
@@ -143,7 +153,7 @@ export default function Hero() {
             className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
           >
             <Download className="size-4" />
-            Download CV
+            {t("download_cv")}
           </a>
         </FramerWrapper>
         <FramerWrapper delay={0.6} y={50}>

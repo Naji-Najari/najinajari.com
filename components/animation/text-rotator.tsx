@@ -1,10 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { Highlighter } from "@/components/ui/highlighter";
 
 export default function TextRotator() {
+  const t = useTranslations("hero");
   const [ready, setReady] = useState(false);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -20,7 +22,7 @@ export default function TextRotator() {
 
   return (
     <p className="text-xl sm:text-3xl font-medium text-muted-foreground">
-      I am a{" "}
+      {t("role_prefix")}{" "}
       {ready ? (
         <Highlighter
           action="highlight"
@@ -28,10 +30,10 @@ export default function TextRotator() {
           animationDuration={1500}
           padding={5}
         >
-          <span className="font-bold text-foreground">Senior AI Engineer</span>
+          <span className="font-bold text-foreground">{t("role")}</span>
         </Highlighter>
       ) : (
-        <span className="font-bold text-foreground">Senior AI Engineer</span>
+        <span className="font-bold text-foreground">{t("role")}</span>
       )}
     </p>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Mail, Send, CheckCircle, Loader2, Phone, Copy, Check } from "lucide-react";
 import { BlurFade } from "@/components/ui/blur-fade";
@@ -81,6 +82,7 @@ const contactItems = [
 ];
 
 export default function Contact() {
+  const t = useTranslations("contact");
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
@@ -109,10 +111,10 @@ export default function Contact() {
         <BlurFade delay={0.1} inView>
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-foreground heading-underline inline-block">
-              Contact
+              {t("title")}
             </h2>
             <p className="mt-6 text-lg text-foreground">
-              Interested in working together? Let&apos;s talk.
+              {t("subtitle")}
             </p>
           </div>
         </BlurFade>
@@ -138,7 +140,7 @@ export default function Contact() {
           <BlurFade delay={0.18} inView>
             <div className="flex items-center gap-4 mb-8">
               <div className="flex-1 h-px bg-neutral-200 dark:bg-neutral-800" />
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">or fill the form</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wider">{t("or_form")}</span>
               <div className="flex-1 h-px bg-neutral-200 dark:bg-neutral-800" />
             </div>
           </BlurFade>
@@ -154,27 +156,27 @@ export default function Contact() {
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    placeholder="Your name"
+                    placeholder={t("your_name")}
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     required
                   />
                   <Input
                     type="email"
-                    placeholder="Your email"
+                    placeholder={t("your_email")}
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     required
                   />
                 </div>
                 <Input
-                  placeholder="Subject"
+                  placeholder={t("subject")}
                   value={form.subject}
                   onChange={(e) => setForm({ ...form, subject: e.target.value })}
                   required
                 />
                 <Textarea
-                  placeholder="Your message"
+                  placeholder={t("your_message")}
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   required
@@ -187,10 +189,10 @@ export default function Contact() {
                   {status === "sending" && <Loader2 className="size-4 animate-spin" />}
                   {status === "sent" && <CheckCircle className="size-4" />}
                   {status === "idle" || status === "error" ? <Send className="size-4" /> : null}
-                  {status === "idle" && "Send message"}
-                  {status === "sending" && "Sending..."}
-                  {status === "sent" && "Message sent!"}
-                  {status === "error" && "Try again"}
+                  {status === "idle" && t("send")}
+                  {status === "sending" && t("sending")}
+                  {status === "sent" && t("sent")}
+                  {status === "error" && t("error")}
                 </button>
               </form>
             </MagicCard>

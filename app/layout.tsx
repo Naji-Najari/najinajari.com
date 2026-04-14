@@ -1,9 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider";
-import { AptabaseClient } from "@/components/analytics/aptabase-client";
-import { PostHogProvider, PostHogPageView } from "@/components/analytics/posthog-provider";
-import { Suspense } from "react";
 import "./globals.css";
 
 const inter = Inter({
@@ -66,23 +62,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body className="min-h-screen antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <PostHogProvider>
-            <Suspense fallback={null}><PostHogPageView /></Suspense>
-            <AptabaseClient>
-              {children}
-            </AptabaseClient>
-          </PostHogProvider>
-        </ThemeProvider>
-      </body>
-    </html>
-  );
+  return children;
 }

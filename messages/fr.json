@@ -1,0 +1,114 @@
+{
+  "hero": {
+    "name": "Naji Najari, Ph.D.",
+    "role_prefix": "Je suis",
+    "role": "Ingénieur IA Senior",
+    "description": "Je conçois des plateformes multi-agents, des pipelines RAG et des produits LLM en production chez Brevo. Doctorat en détection d'anomalies non supervisée.",
+    "download_cv": "Télécharger CV",
+    "email": "Email"
+  },
+  "about": {
+    "title": "À propos",
+    "subtitle": "Ingénieur IA Senior avec un Doctorat en Machine Learning. J'aide les entreprises à mettre en production des agents IA, des systèmes RAG et des produits LLM.",
+    "agents_title": "Agents IA",
+    "agents_desc": "Je conçois des systèmes multi-agents qui vont au-delà des chatbots. Des agents qui appellent vos APIs, interrogent vos données et exécutent de la logique métier. Construits pour tourner 24/7, pas juste pour une démo.",
+    "rag_title": "Pipelines RAG",
+    "rag_desc": "Je construis des systèmes de recherche qui donnent à vos utilisateurs des réponses précises à partir de vos documents. Recherche hybride, reranking, stratégies de chunking et évaluation pour éviter les hallucinations.",
+    "eval_title": "Évaluation LLM",
+    "eval_desc": "Je mets en place le tracing, le scoring LLM-as-a-judge et des pipelines de revue humaine pour mesurer la qualité de votre IA et l'améliorer en continu.",
+    "finetune_title": "Fine-tuning de modèles",
+    "finetune_desc": "Quand un modèle générique ne suffit pas, je fine-tune des LLMs open-source sur vos données. Classifieurs, génération spécialisée, NLP multilingue. De l'entraînement au serving."
+  },
+  "experience": {
+    "title": "Expérience",
+    "brevo_title": "Ingénieur IA Senior",
+    "brevo_date": "Sep 2024 — Présent · 1 an 8 mois",
+    "brevo_location": "Paris, France",
+    "brevo_bullets": [
+      "Développé plusieurs agents de production au sein d'une plateforme IA multi-agents utilisée par les utilisateurs finaux et les équipes internes : Q&A documentaire (RAG), gestion de contacts CRM, analytics et recommandation de campagnes | LangChain, LangGraph, Google ADK",
+      "Exposé les APIs publiques de Brevo en tant que serveurs MCP, permettant aux développeurs d'utiliser les outils Brevo depuis des assistants IA (Claude, Cursor) | FastMCP, FastAPI",
+      "Implémenté des pipelines RAG de production pour répondre aux requêtes clients en temps réel | Ragflow, LangChain",
+      "Intégré Langfuse pour le tracing et monitoring LLM de bout en bout ; mis en place l'évaluation LLM-as-a-judge avec annotation humaine",
+      "Fine-tuné BERT pour la détection multilingue de spam et fraude | HuggingFace Transformers, CI/CD",
+      "Entraîné et déployé des modèles ML de recommandation d'audience | ZenML, MLOps, MLFlow"
+    ],
+    "forvia_title": "Data Scientist Senior — Responsable technique",
+    "forvia_date": "Jan 2023 — Sep 2024 · 1 an 9 mois",
+    "forvia_location": "Paris, France",
+    "forvia_bullets": [
+      "Dirigé une équipe pluridisciplinaire de 6-8 personnes (data scientists, ingénieurs logiciel, développeurs front-end) livrant des solutions ML pour les usines du 4ème équipementier automobile mondial",
+      "Construit des modèles de maintenance prédictive : optimisation de paramètres, prévision de séries temporelles, détection d'anomalies",
+      "Appliqué les LLMs pour l'analyse avancée de texte sur la documentation et les rapports de fabrication",
+      "Reconnu en interne comme Expert en Machine Learning"
+    ],
+    "orange_title": "Data Scientist — Doctorant (CIFRE)",
+    "orange_date": "Nov 2019 — Fév 2023 · 3 ans 4 mois",
+    "orange_location": "Grenoble, France",
+    "orange_bullets": [
+      "Entraîné et déployé des modèles robustes de détection d'anomalies non supervisée pour le monitoring du trafic réseau en temps réel | PyTorch, PySpark, Docker",
+      "Publié 4 articles dans des conférences ML de premier plan : ECML-PKDD, IEEE COINS, AINA, SINConf",
+      "Déposé 2 brevets internationaux (INPI) pour la détection d'anomalies IoT et le fingerprinting du trafic réseau",
+      "Thèse de doctorat (CIFRE) : \"Détection robuste d'anomalies non supervisée\""
+    ]
+  },
+  "projects": {
+    "title": "Projets",
+    "visit_site": "Voir le site",
+    "coming_soon": "Bientôt",
+    "ragmaker_title": "RagMaker — Plateforme RAG Agentique",
+    "ragmaker_desc": "Co-développé une plateforme SaaS B2B agentique permettant aux utilisateurs d'interroger des documents multi-formats et de connecter des outils externes via l'IA conversationnelle. Recherche hybride (sémantique + mots-clés), Text-to-SQL, intégration MCP, workflows agentiques LangGraph.",
+    "multiagent_title": "multi-agent-llm-stack",
+    "multiagent_desc": "Stack ML de production de bout en bout : RAG multi-agents avec LangGraph, fine-tuning LLM (LoRA/QLoRA), serving vLLM, Docker, Kubernetes, monitoring Prometheus. Stack complet, open source."
+  },
+  "publications": {
+    "title": "Publications & Brevets",
+    "patents_title": "Brevets internationaux",
+    "read_paper": "Article",
+    "filed": "Déposé"
+  },
+  "stack": {
+    "title": "Stack",
+    "languages_items": ["Français — Courant", "Anglais — Courant", "Arabe — Natif"]
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Envie de travailler ensemble ? Parlons-en.",
+    "reach_out": "Contactez-moi directement ou remplissez le formulaire.",
+    "or_form": "ou remplissez le formulaire",
+    "your_name": "Votre nom",
+    "your_email": "Votre email",
+    "subject": "Sujet",
+    "your_message": "Votre message",
+    "send": "Envoyer",
+    "sending": "Envoi en cours...",
+    "sent": "Message envoyé !",
+    "error": "Réessayer"
+  },
+  "footer": {
+    "built_with": "Construit avec Next.js."
+  },
+  "chatbot": {
+    "assistant_name": "Assistant de Naji",
+    "ask_anything": "Posez-moi une question",
+    "welcome": "Salut 👋",
+    "welcome_sub": "Posez-moi une question sur Naji.",
+    "placeholder": "Posez votre question...",
+    "suggestion_1": "Votre expérience",
+    "suggestion_1_label": "Parcours",
+    "suggestion_2": "Vos services",
+    "suggestion_2_label": "Ce que vous proposez",
+    "suggestion_3": "Votre stack",
+    "suggestion_3_label": "Technologies",
+    "suggestion_4": "Votre recherche",
+    "suggestion_4_label": "Doctorat & publications"
+  },
+  "nav": {
+    "home": "Accueil",
+    "about": "À propos",
+    "experience": "Expérience",
+    "stack": "Stack",
+    "projects": "Projets",
+    "publications": "Publications",
+    "contact": "Contact"
+  }
+}

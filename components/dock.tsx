@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { navItems } from "@/lib/data";
+import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 const iconMap: Record<string, React.ElementType> = {
   Home,
@@ -82,7 +84,7 @@ function DockItem({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute -bottom-8 text-xs font-medium bg-foreground text-background px-2 py-1 rounded-md whitespace-nowrap"
+            className="absolute -top-8 text-xs font-medium bg-foreground text-background px-2 py-1 rounded-md whitespace-nowrap pointer-events-none"
           >
             {label}
           </motion.span>
@@ -137,7 +139,7 @@ function ThemeToggle({ mouseX }: { mouseX: MotionValue<number> }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute -bottom-8 text-xs font-medium bg-foreground text-background px-2 py-1 rounded-md whitespace-nowrap"
+            className="absolute -top-8 text-xs font-medium bg-foreground text-background px-2 py-1 rounded-md whitespace-nowrap pointer-events-none"
           >
             Theme
           </motion.span>
@@ -176,9 +178,20 @@ function useActiveSection() {
   return activeSection;
 }
 
+const navKeyMap: Record<string, string> = {
+  home: "home",
+  about: "about",
+  experience: "experience",
+  stack: "stack",
+  projects: "projects",
+  publications: "publications",
+  contact: "contact",
+};
+
 export default function Dock() {
   const mouseX = useMotionValue(Infinity);
   const activeSection = useActiveSection();
+  const t = useTranslations("nav");
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -188,7 +201,7 @@ export default function Dock() {
     <motion.nav
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-end gap-0.5 sm:gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-background/70 backdrop-blur-xl border-2 border-border rounded-2xl shadow-lg max-w-[95vw] overflow-x-auto"
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-end gap-0.5 sm:gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-background/70 backdrop-blur-xl border-2 border-border rounded-2xl shadow-lg overflow-visible"
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.3 }}
@@ -197,7 +210,7 @@ export default function Dock() {
         <DockItem
           key={item.id}
           icon={iconMap[item.icon]}
-          label={item.label}
+          label={t(navKeyMap[item.id] || item.id)}
           isActive={activeSection === item.id}
           onClick={() => scrollTo(item.id)}
           mouseX={mouseX}
@@ -205,6 +218,7 @@ export default function Dock() {
       ))}
       <div className="w-px h-8 bg-border mx-1 self-center" />
       <ThemeToggle mouseX={mouseX} />
+      <LanguageSwitcher />
     </motion.nav>
   );
 }

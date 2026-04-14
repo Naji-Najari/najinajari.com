@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Bot, Search, Activity, Cpu } from "lucide-react";
 import { motion, useSpring, useTransform } from "framer-motion";
 import { useRef } from "react";
@@ -7,37 +8,13 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { MagicCard } from "@/components/ui/magic-card";
 
 const services = [
-  {
-    icon: Bot,
-    title: "AI Agents",
-    description:
-      "I design multi-agent systems that go beyond chatbots. Agents that call your APIs, query your data, and execute real business logic. Built to run 24/7, not just during a demo.",
-    keywords: "LangGraph, Google ADK, FastAPI, MCP",
-  },
-  {
-    icon: Search,
-    title: "RAG Pipelines",
-    description:
-      "I build retrieval systems that give your users accurate answers from your own documents. Hybrid search, reranking, chunking strategies, and proper evaluation to avoid hallucinations.",
-    keywords: "RAG, Hybrid Search, LangChain",
-  },
-  {
-    icon: Activity,
-    title: "LLM Evaluation",
-    description:
-      "I set up tracing, LLM-as-a-judge scoring, and human review pipelines so you can measure your AI quality and improve it continuously.",
-    keywords: "Langfuse, LLM-as-a-Judge, HITL",
-  },
-  {
-    icon: Cpu,
-    title: "Model Fine-tuning",
-    description:
-      "When a generic model isn't enough, I fine-tune open-source LLMs on your data. Custom classifiers, domain-specific generation, multilingual NLP. From training to serving.",
-    keywords: "LoRA, PEFT, vLLM, HuggingFace",
-  },
+  { icon: Bot, titleKey: "agents_title", descKey: "agents_desc", keywords: "LangGraph, Google ADK, FastAPI, MCP" },
+  { icon: Search, titleKey: "rag_title", descKey: "rag_desc", keywords: "RAG, Hybrid Search, LangChain" },
+  { icon: Activity, titleKey: "eval_title", descKey: "eval_desc", keywords: "Langfuse, LLM-as-a-Judge, HITL" },
+  { icon: Cpu, titleKey: "finetune_title", descKey: "finetune_desc", keywords: "LoRA, PEFT, vLLM, HuggingFace" },
 ];
 
-function ServiceCard({ item, index }: { item: typeof services[number]; index: number }) {
+function ServiceCard({ item, index, t }: { item: typeof services[number]; index: number; t: ReturnType<typeof useTranslations> }) {
   const springValue = useSpring(0, { bounce: 0 });
   const scale = useTransform(springValue, [0, 1], [1, 1.05]);
   const zIndex = useTransform(springValue, (v) => Math.floor(v * 10) + 10);
@@ -60,11 +37,11 @@ function ServiceCard({ item, index }: { item: typeof services[number]; index: nu
             <div className="flex items-center gap-2 mb-3">
               <item.icon className="size-5 text-primary-sky" />
               <h3 className="text-base font-bold text-foreground">
-                {item.title}
+                {t(item.titleKey)}
               </h3>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-              {item.description}
+              {t(item.descKey)}
             </p>
             <p className="mt-4 text-xs text-neutral-400 dark:text-neutral-500">
               {item.keywords}
@@ -77,17 +54,18 @@ function ServiceCard({ item, index }: { item: typeof services[number]; index: nu
 }
 
 export default function About() {
+  const t = useTranslations("about");
+
   return (
     <section id="about" className="py-28 md:py-36 px-6 lg:px-20">
       <div className="max-w-6xl mx-auto">
         <BlurFade delay={0.1} inView>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground heading-underline inline-block">
-              About
+              {t("title")}
             </h2>
             <p className="mt-6 text-base text-muted-foreground max-w-2xl mx-auto">
-              Senior AI Engineer with a PhD in Machine Learning. I help companies
-              ship AI agents, RAG systems, and LLM-powered products to production.
+              {t("subtitle")}
             </p>
           </div>
         </BlurFade>
@@ -96,7 +74,7 @@ export default function About() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {services.map((item, index) => (
-            <ServiceCard key={item.title} item={item} index={index} />
+            <ServiceCard key={item.titleKey} item={item} index={index} t={t} />
           ))}
         </div>
       </div>

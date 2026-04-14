@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { stackCategories } from "@/lib/data";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { MagicCard } from "@/components/ui/magic-card";
@@ -51,19 +52,27 @@ const categoryIcons: Record<string, React.ElementType> = {
 };
 
 export default function Stack() {
+  const t = useTranslations("stack");
+
+  const translatedCategories = stackCategories.map((cat) =>
+    cat.label === "Languages"
+      ? { ...cat, items: t.raw("languages_items") as string[] }
+      : cat
+  );
+
   return (
     <section id="stack" className="py-20 md:py-28 px-6 lg:px-20">
       <div className="max-w-6xl mx-auto">
         <BlurFade delay={0.1} inView>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground heading-underline inline-block">
-              Stack
+              {t("title")}
             </h2>
           </div>
         </BlurFade>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {stackCategories.map((category, index) => {
+          {translatedCategories.map((category, index) => {
             const Icon = categoryIcons[category.label] || Code;
             return (
               <BlurFade key={category.label} delay={0.1 + index * 0.06} inView>
