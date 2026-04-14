@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { Mail, ChevronDown, Mouse, Download } from "lucide-react";
 import { FaLinkedinIn, FaGithub, FaGraduationCap } from "react-icons/fa";
@@ -136,9 +137,12 @@ export default function Hero() {
           y={0}
           x={100}
         >
-          <img
+          <Image
             src="/photo.jpg"
             alt="Naji Najari"
+            width={288}
+            height={320}
+            priority
             className="w-72 h-80 rounded-2xl border-2 border-border shadow-lg object-cover"
           />
         </FramerWrapper>

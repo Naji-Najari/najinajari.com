@@ -4,6 +4,19 @@ import {
   propagateAttributes,
   startObservation,
 } from "@langfuse/tracing";
+import { z } from "zod";
+
+const ChatSchema = z.object({
+  messages: z
+    .array(
+      z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().min(1).max(2000),
+      }),
+    )
+    .min(1)
+    .max(50),
+});
 
 const MODEL = "claude-haiku-4-5-20251001";
 const MAX_TOKENS = 1024;
@@ -41,6 +54,7 @@ FOLLOW-UPS:
 
 ABOUT:
 Naji Najari is a Senior AI Engineer with a PhD in Machine Learning, based in Paris, France.
+He has 6+ years of hands-on AI/ML experience (since Nov 2019), covering anomaly detection research, industrial data science leadership, and now multi-agent LLM systems in production.
 He is open to senior freelance missions (remote/hybrid) in AI Agents, RAG, LLMOps, and MLOps.
 Email: najarinaji2015@gmail.com
 LinkedIn: linkedin.com/in/naji-najari
@@ -100,24 +114,22 @@ function hashIp(ip: string | null): string {
 }
 
 export async function POST(req: Request) {
-  let messages: ChatMessage[];
+  let rawBody: unknown;
   try {
-    const body = await req.json();
-    messages = body.messages;
+    rawBody = await req.json();
   } catch {
     return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  if (!messages || !Array.isArray(messages) || messages.length === 0) {
-    return Response.json({ error: "Messages required" }, { status: 400 });
+  const parsed = ChatSchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return Response.json(
+      { error: "Invalid input", issues: parsed.error.issues },
+      { status: 400 },
+    );
   }
 
-  const lastMessage = messages[messages.length - 1];
-  if (lastMessage.content && lastMessage.content.length > 2000) {
-    return Response.json({ error: "Message too long" }, { status: 400 });
-  }
-
-  const trimmedMessages = messages.slice(-20);
+  const trimmedMessages: ChatMessage[] = parsed.data.messages.slice(-20);
 
   const sessionId = req.headers.get("x-session-id") ?? randomUUID();
   const locale = req.headers.get("x-locale") ?? "en";
@@ -137,6 +149,10 @@ export async function POST(req: Request) {
       tags: ["portfolio", "chatbot", locale],
     },
     () => {
+      const lastUserMessage =
+        [...trimmedMessages].reverse().find((m) => m.role === "user")?.content ??
+        "";
+
       const generation = startObservation(
         "portfolio-chat",
         {
@@ -146,6 +162,9 @@ export async function POST(req: Request) {
         },
         { asType: "generation" },
       );
+
+      // Populate trace-level input so the Langfuse trace preview is not empty.
+      generation.setTraceIO({ input: lastUserMessage });
 
       const stream = client.messages.stream({
         model: MODEL,
@@ -186,6 +205,10 @@ export async function POST(req: Request) {
                   finalMessage.usage.output_tokens,
               },
             });
+            generation.setTraceIO({
+              input: lastUserMessage,
+              output: fullOutput,
+            });
 
             controller.enqueue(encoder.encode("data: [DONE]\n\n"));
             controller.close();
@@ -196,6 +219,10 @@ export async function POST(req: Request) {
               level: "ERROR",
               statusMessage: message,
               output: fullOutput || undefined,
+            });
+            generation.setTraceIO({
+              input: lastUserMessage,
+              output: fullOutput || message,
             });
             controller.enqueue(
               encoder.encode(

@@ -1,4 +1,12 @@
 {
+  "metadata": {
+    "title": "Naji Najari — Senior AI Engineer | Multi-Agent Systems, RAG, LLMOps",
+    "description": "Senior AI Engineer with a PhD in Machine Learning. Building multi-agent AI systems in production: LangGraph, RAG, Google ADK, LLMOps. Open to freelance missions.",
+    "og_title": "Naji Najari — Senior AI Engineer",
+    "og_description": "Senior AI Engineer with a PhD in ML. Building multi-agent AI systems, RAG pipelines, and LLM-powered products in production.",
+    "twitter_title": "Naji Najari — Senior AI Engineer",
+    "twitter_description": "Senior AI Engineer with a PhD in ML. AI Agents, RAG, LLMOps. Open to freelance."
+  },
   "hero": {
     "name": "Naji Najari, Ph.D.",
     "role_prefix": "I am a",

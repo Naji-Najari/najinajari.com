@@ -1,6 +1,4 @@
-"use client";
-
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { MapPin, Calendar } from "lucide-react";
 import { BlurFade } from "@/components/ui/blur-fade";
 
@@ -13,8 +11,8 @@ const companyLogos: Record<string, string> = {
   Orange: "orange.com",
 };
 
-export default function Experience() {
-  const t = useTranslations("experience");
+export default async function Experience() {
+  const t = await getTranslations("experience");
 
   const experienceData = [
     {

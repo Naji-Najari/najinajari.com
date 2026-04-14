@@ -1,6 +1,4 @@
-"use client";
-
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { stackCategories } from "@/lib/data";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { MagicCard } from "@/components/ui/magic-card";
@@ -51,8 +49,8 @@ const categoryIcons: Record<string, React.ElementType> = {
   Languages: Languages,
 };
 
-export default function Stack() {
-  const t = useTranslations("stack");
+export default async function Stack() {
+  const t = await getTranslations("stack");
 
   const translatedCategories = stackCategories.map((cat) =>
     cat.label === "Languages"

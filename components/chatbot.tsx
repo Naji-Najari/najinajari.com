@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { MessageSquare, X, ArrowUp, Square, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import rehypeSanitize from "rehype-sanitize";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -247,9 +249,11 @@ export default function Chatbot() {
               )}
             >
               <div className="flex items-center gap-3">
-                <img
+                <Image
                   src="/photo.jpg"
                   alt="Naji Najari"
+                  width={40}
+                  height={40}
                   className="h-10 w-10 rounded-full object-cover ring-2 ring-neutral-200 dark:ring-neutral-700"
                 />
                 <div className="flex flex-col">
@@ -309,7 +313,7 @@ export default function Chatbot() {
                       ) : (
                         <div className="animate-in fade-in slide-in-from-bottom-1 duration-150">
                           <div className="mx-2 leading-7 break-words text-sm text-foreground prose prose-sm prose-neutral dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-headings:my-2 prose-strong:text-foreground prose-a:text-primary-sky">
-                            <ReactMarkdown>{msg.content}</ReactMarkdown>
+                            <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{msg.content}</ReactMarkdown>
                           </div>
                           <div className="mt-1 ml-2">
                             <CopyButton text={msg.content} />
@@ -321,7 +325,7 @@ export default function Chatbot() {
                   {isStreaming && streamingContent && (
                     <div className="animate-in fade-in duration-150">
                       <div className="mx-2 leading-7 break-words text-sm text-foreground prose prose-sm prose-neutral dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-headings:my-2 prose-strong:text-foreground prose-a:text-primary-sky">
-                        <ReactMarkdown>{streamingContent.split("---SUGGESTIONS---")[0]}</ReactMarkdown>
+                        <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{streamingContent.split("---SUGGESTIONS---")[0]}</ReactMarkdown>
                         <span className="inline-block w-1.5 h-4 bg-primary animate-pulse ml-0.5 align-middle" />
                       </div>
                     </div>

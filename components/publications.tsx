@@ -1,13 +1,11 @@
-"use client";
-
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { ExternalLink, ShieldCheck, FileText } from "lucide-react";
 import { publications, patents } from "@/lib/data";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { MagicCard } from "@/components/ui/magic-card";
 
-export default function Publications() {
-  const t = useTranslations("publications");
+export default async function Publications() {
+  const t = await getTranslations("publications");
 
   return (
     <section id="publications" className="py-20 md:py-28 px-6 lg:px-20">
