@@ -17,12 +17,14 @@ import {
   BookOpen,
   Layers,
   Mail,
+  Newspaper,
   Sun,
   Moon,
 } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { navItems } from "@/lib/data";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/language-switcher";
 
 const iconMap: Record<string, React.ElementType> = {
@@ -33,6 +35,7 @@ const iconMap: Record<string, React.ElementType> = {
   BookOpen,
   Layers,
   Mail,
+  Newspaper,
 };
 
 function DockItem({
@@ -149,10 +152,14 @@ function ThemeToggle({ mouseX }: { mouseX: MotionValue<number> }) {
   );
 }
 
-function useActiveSection() {
-  const [activeSection, setActiveSection] = useState("home");
+function useActiveSection(enabled: boolean, defaultSection: string) {
+  const [activeSection, setActiveSection] = useState(defaultSection);
 
   useEffect(() => {
+    if (!enabled) {
+      setActiveSection(defaultSection);
+      return;
+    }
     const observers: IntersectionObserver[] = [];
 
     navItems.forEach(({ id }) => {
@@ -173,7 +180,7 @@ function useActiveSection() {
     });
 
     return () => observers.forEach((o) => o.disconnect());
-  }, []);
+  }, [enabled, defaultSection]);
 
   return activeSection;
 }
@@ -185,16 +192,31 @@ const navKeyMap: Record<string, string> = {
   stack: "stack",
   projects: "projects",
   publications: "publications",
+  blog: "blog",
   contact: "contact",
 };
 
 export default function Dock() {
   const mouseX = useMotionValue(Infinity);
-  const activeSection = useActiveSection();
+  const locale = useLocale();
+  const pathname = usePathname();
+  const router = useRouter();
+  const isHome = pathname === `/${locale}` || pathname === "/";
+  const isBlogRoute = pathname.startsWith(`/${locale}/blog`);
+  const defaultSection = isBlogRoute ? "blog" : "home";
+  const activeSection = useActiveSection(isHome, defaultSection);
   const t = useTranslations("nav");
 
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const handleNav = (id: string) => {
+    if (isHome) {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+    if (id === "blog" && isBlogRoute) {
+      router.push(`/${locale}/blog`);
+      return;
+    }
+    router.push(`/${locale}${id === "home" ? "" : `#${id}`}`);
   };
 
   return (
@@ -212,7 +234,7 @@ export default function Dock() {
           icon={iconMap[item.icon]}
           label={t(navKeyMap[item.id] || item.id)}
           isActive={activeSection === item.id}
-          onClick={() => scrollTo(item.id)}
+          onClick={() => handleNav(item.id)}
           mouseX={mouseX}
         />
       ))}

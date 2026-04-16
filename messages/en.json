@@ -117,6 +117,19 @@
     "stack": "Stack",
     "projects": "Projects",
     "publications": "Publications",
+    "blog": "Blog",
     "contact": "Contact"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Notes on applied AI, retrieval-augmented generation, and shipping LLM products.",
+    "see_all": "See all articles",
+    "read_more": "Read article",
+    "back_to_blog": "Back to blog",
+    "no_posts": "No articles published yet — stay tuned.",
+    "prev": "Previous articles",
+    "next": "Next articles",
+    "metadata_title": "Blog — Naji Najari",
+    "metadata_description": "Essays and notes on AI engineering, RAG systems, and shipping LLM products by Naji Najari."
   }
 }

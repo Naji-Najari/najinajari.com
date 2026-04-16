@@ -1,0 +1,49 @@
+---
+title: "Progressive skill loading: how Google ADK 2.0 fixes context bloat in multi-agent systems"
+description: "Most multi-agent systems collapse under their own system prompt. ADK 2.0's three-layer skill loading cuts baseline context by ~90%. Here's how it works and why it matters."
+date: "2026-04-14"
+tags: ["agents", "llm", "google-adk", "context-engineering"]
+featured: true
+image: "/blog/progressive-skill-loading-adk.png"
+---
+
+Most multi-agent systems I've worked on hit the same wall.
+
+You add more tools, more skills, more context to the system prompt. It works fine at first. Then the list of instructions grows — and the agent gets confused, latency climbs, costs explode.
+
+Google ADK 2.0 ships a pattern that directly addresses this: **progressive skill loading**.
+
+## The idea
+
+Instead of loading every instruction upfront (often 10,000+ tokens), skills are loaded in three layers:
+
+- **L1 — Metadata.** Name and description only, roughly 50 tokens per skill. Loaded on every request. The agent reads this like a menu and picks what's relevant.
+- **L2 — Instructions.** The full skill body, around 500 tokens. Loaded on demand, only when the agent decides it needs that skill.
+- **L3 — Resources.** Deep reference files — API specs, style guides, schemas. Loaded only when a skill's instructions require them.
+
+With 10 skills, this means roughly **1,000 tokens at startup instead of 10,000**. A 90% reduction in baseline context — before the conversation even begins.
+
+## Four skill patterns
+
+ADK also defines four ways to author a skill:
+
+1. **Inline** — defined directly in code. Good for small, simple skills.
+2. **File-based** — `SKILL.md` files loaded from disk. Detailed, reusable.
+3. **External** — imported from community repositories. Same API, different source.
+4. **Meta skill** — a skill that generates new skills at runtime.
+
+That last one is the interesting one. A *skill factory* that creates domain expertise on demand, following the Agent Skills spec. It flips the usual model: instead of pre-defining everything your agent might need, you let it compose expertise when the task demands it.
+
+## Why this matters
+
+We've been layering cognitive load on LLMs the same way we used to stuff everything into `main()`. It worked while models were forgiving. With longer conversations, more tools, and tighter latency budgets, it stops working fast.
+
+Progressive loading mirrors how humans actually work: scan a table of contents, read the chapter you need, look up the reference. Agents should do the same.
+
+I'm curious whether anyone has implemented something equivalent outside ADK. If you have, I'd love to hear how.
+
+---
+
+**References**
+
+- [Developer's guide to building ADK agents with skills — Google Developers Blog](https://developers.googleblog.com/developers-guide-to-building-adk-agents-with-skills/)

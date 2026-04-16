@@ -1,0 +1,49 @@
+---
+title: "Chargement progressif des skills : comment Google ADK 2.0 résout le bloat de contexte des systèmes multi-agents"
+description: "La plupart des systèmes multi-agents s'effondrent sous le poids de leur propre system prompt. Le chargement en trois couches d'ADK 2.0 réduit le contexte de base d'environ 90 %. Voici comment et pourquoi ça compte."
+date: "2026-04-14"
+tags: ["agents", "llm", "google-adk", "ingénierie-de-contexte"]
+featured: true
+image: "/blog/progressive-skill-loading-adk.png"
+---
+
+Tous les systèmes multi-agents sur lesquels j'ai travaillé finissent par se heurter au même mur.
+
+On ajoute des tools, des skills, du contexte dans le system prompt. Au début ça marche. Puis la liste d'instructions grossit — et l'agent se perd, la latence grimpe, les coûts explosent.
+
+Google ADK 2.0 propose un pattern qui attaque ce problème de front : le **chargement progressif des skills**.
+
+## L'idée
+
+Plutôt que de charger toutes les instructions d'un coup (souvent plus de 10 000 tokens), les skills sont chargés en trois couches :
+
+- **L1 — Metadata.** Uniquement le nom et la description, ~50 tokens par skill. Chargé à chaque requête. L'agent lit ça comme un menu et choisit ce qui est pertinent.
+- **L2 — Instructions.** Le corps complet du skill, ~500 tokens. Chargé à la demande, uniquement quand l'agent décide d'en avoir besoin.
+- **L3 — Resources.** Fichiers de référence profonds — specs d'API, guides de style, schémas. Chargés seulement si les instructions du skill les réclament.
+
+Avec 10 skills, ça donne environ **1 000 tokens au démarrage au lieu de 10 000**. Une réduction de 90 % du contexte de base — avant même que la conversation commence.
+
+## Quatre patterns de skill
+
+ADK définit également quatre façons d'écrire un skill :
+
+1. **Inline** — défini directement dans le code. Bien pour les skills simples et légers.
+2. **File-based** — des fichiers `SKILL.md` chargés depuis le disque. Détaillés, réutilisables.
+3. **External** — importés depuis des dépôts communautaires. Même API, autre source.
+4. **Meta skill** — un skill qui génère d'autres skills à l'exécution.
+
+Le dernier est le plus intéressant. Une *skill factory* qui crée de l'expertise domaine à la demande, en suivant la spec Agent Skills. Ça inverse le modèle habituel : au lieu de pré-définir tout ce dont l'agent pourrait avoir besoin, on le laisse composer son expertise quand la tâche l'exige.
+
+## Pourquoi ça compte
+
+On empile depuis des années de la charge cognitive sur les LLMs comme on empilait tout dans `main()`. Ça marchait tant que les modèles étaient tolérants. Avec des conversations plus longues, plus de tools et des budgets de latence plus serrés, ça ne passe plus.
+
+Le chargement progressif colle à la façon dont les humains travaillent vraiment : on scanne une table des matières, on lit le chapitre qu'il nous faut, on consulte la référence. Les agents devraient faire pareil.
+
+Curieux de savoir si quelqu'un a implémenté un équivalent hors d'ADK. Si c'est ton cas, je serais ravi d'en discuter.
+
+---
+
+**Références**
+
+- [Developer's guide to building ADK agents with skills — Google Developers Blog](https://developers.googleblog.com/developers-guide-to-building-adk-agents-with-skills/)
