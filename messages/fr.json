@@ -117,6 +117,20 @@
     "stack": "Stack",
     "projects": "Projets",
     "publications": "Publications",
+    "blog": "Blog",
     "contact": "Contact"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Notes sur l'IA appliquée, le RAG et la mise en production de produits LLM.",
+    "see_all": "Voir tous les articles",
+    "read_more": "Lire l'article",
+    "back_to_blog": "Retour au blog",
+    "no_posts": "Aucun article publié pour l'instant — à bientôt.",
+    "prev": "Articles précédents",
+    "next": "Articles suivants",
+    "carousel_label": "Derniers articles du blog",
+    "metadata_title": "Blog — Naji Najari",
+    "metadata_description": "Essais et notes sur l'ingénierie IA, les systèmes RAG et la mise en production de produits LLM par Naji Najari."
   }
 }

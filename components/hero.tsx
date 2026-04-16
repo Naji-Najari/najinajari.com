@@ -11,6 +11,7 @@ import FramerWrapper from "@/components/animation/framer-wrapper";
 import { TextEffect } from "@/components/animation/text-effect";
 import TextRotator from "@/components/animation/text-rotator";
 import HackerBtn from "@/components/animation/hacker-btn";
+import { useTrack } from "@/hooks/use-track";
 
 const stackTags = [
   { name: "LangGraph", domain: "langchain.com" },
@@ -38,10 +39,103 @@ const iconMap: Record<string, React.ElementType> = {
   Mail,
 };
 
+type HeroAction = {
+  key: string;
+  href: string;
+  label: string;
+  platform: string;
+  icon?: React.ElementType;
+  logoDomain?: string;
+  download?: boolean;
+  external?: boolean;
+};
+
+function HeroActionLink({
+  action,
+  size,
+  onClick,
+}: {
+  action: HeroAction;
+  size: "sm" | "md";
+  onClick: () => void;
+}) {
+  const sizeClass =
+    size === "md"
+      ? "text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5"
+      : "text-xs px-3 py-2";
+  const Icon = action.icon;
+  return (
+    <a
+      href={action.href}
+      onClick={onClick}
+      {...(action.download ? { download: true } : {})}
+      {...(action.external
+        ? { target: "_blank", rel: "noopener noreferrer" }
+        : {})}
+      className={`btn-3d inline-flex items-center gap-1.5 ${sizeClass} font-medium rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150`}
+    >
+      {Icon ? (
+        <Icon className="size-4" />
+      ) : action.logoDomain ? (
+        <img
+          src={logoUrl(action.logoDomain)}
+          alt={action.label}
+          className="size-4 rounded-sm"
+        />
+      ) : null}
+      {action.label}
+    </a>
+  );
+}
+
 export default function Hero() {
   const t = useTranslations("hero");
   const locale = useLocale();
   const isArabic = locale === "ar";
+  const track = useTrack();
+  const actions: HeroAction[] = [
+    {
+      key: "cv",
+      href: "/CV_Naji_NAJARI.pdf",
+      label: t("download_cv"),
+      platform: "cv_download",
+      icon: Download,
+      download: true,
+    },
+    {
+      key: "email",
+      href: "mailto:najarinaji2015@gmail.com",
+      label: t("email"),
+      platform: "email",
+      icon: Mail,
+    },
+    {
+      key: "linkedin",
+      href: "https://www.linkedin.com/in/naji-najari",
+      label: "LinkedIn",
+      platform: "linkedin",
+      logoDomain: "linkedin.com",
+      external: true,
+    },
+    {
+      key: "github",
+      href: "https://github.com/Naji-Najari",
+      label: "GitHub",
+      platform: "github",
+      logoDomain: "github.com",
+      external: true,
+    },
+    {
+      key: "scholar",
+      href: "https://scholar.google.com/citations?user=rkgpg1gAAAAJ",
+      label: "Scholar",
+      platform: "google_scholar",
+      logoDomain: "scholar.google.com",
+      external: true,
+    },
+  ];
+  const onAction = (platform: string) => () =>
+    track("external_link_click", { platform, location: "hero" });
 
   return (
     <section
@@ -105,28 +199,16 @@ export default function Hero() {
             ))}
           </div>
 
-          {/* Actions — mobile only */}
+          {/* Mobile-only action row */}
           <div className="mt-8 flex flex-wrap gap-2 lg:hidden">
-            <a href="/CV_Naji_NAJARI.pdf" download className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
-              <Download className="size-4" />
-              {t("download_cv")}
-            </a>
-            <a href="mailto:najarinaji2015@gmail.com" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
-              <Mail className="size-4" />
-              {t("email")}
-            </a>
-            <a href="https://www.linkedin.com/in/naji-najari" target="_blank" rel="noopener noreferrer" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
-              <img src={logoUrl("linkedin.com")} alt="LinkedIn" className="size-4 rounded-sm" />
-              LinkedIn
-            </a>
-            <a href="https://github.com/Naji-Najari" target="_blank" rel="noopener noreferrer" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
-              <img src={logoUrl("github.com")} alt="GitHub" className="size-4 rounded-sm" />
-              GitHub
-            </a>
-            <a href="https://scholar.google.com/citations?user=rkgpg1gAAAAJ" target="_blank" rel="noopener noreferrer" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
-              <img src={logoUrl("scholar.google.com")} alt="Scholar" className="size-4 rounded-sm" />
-              Scholar
-            </a>
+            {actions.map((action) => (
+              <HeroActionLink
+                key={action.key}
+                action={action}
+                size="sm"
+                onClick={onAction(action.platform)}
+              />
+            ))}
           </div>
 
         </FramerWrapper>
@@ -148,60 +230,17 @@ export default function Hero() {
         </FramerWrapper>
       </div>
 
-      {/* Actions — desktop, centered in flow */}
+      {/* Desktop action row, centered in flow */}
       <div className="hidden lg:flex justify-center gap-3 mt-16 lg:mt-20">
-        <FramerWrapper delay={0.5} y={50}>
-          <a
-            href="/CV_Naji_NAJARI.pdf"
-            download
-            className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
-          >
-            <Download className="size-4" />
-            {t("download_cv")}
-          </a>
-        </FramerWrapper>
-        <FramerWrapper delay={0.6} y={50}>
-          <a
-            href="mailto:najarinaji2015@gmail.com"
-            className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
-          >
-            <Mail className="size-4" />
-            Email
-          </a>
-        </FramerWrapper>
-        <FramerWrapper delay={0.7} y={50}>
-          <a
-            href="https://www.linkedin.com/in/naji-najari"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
-          >
-            <img src={logoUrl("linkedin.com")} alt="LinkedIn" className="size-4 rounded-sm" />
-            LinkedIn
-          </a>
-        </FramerWrapper>
-        <FramerWrapper delay={0.8} y={50}>
-          <a
-            href="https://github.com/Naji-Najari"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
-          >
-            <img src={logoUrl("github.com")} alt="GitHub" className="size-4 rounded-sm" />
-            GitHub
-          </a>
-        </FramerWrapper>
-        <FramerWrapper delay={0.9} y={50}>
-          <a
-            href="https://scholar.google.com/citations?user=rkgpg1gAAAAJ"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
-          >
-            <img src={logoUrl("scholar.google.com")} alt="Scholar" className="size-4 rounded-sm" />
-            Scholar
-          </a>
-        </FramerWrapper>
+        {actions.map((action, index) => (
+          <FramerWrapper key={action.key} delay={0.5 + index * 0.1} y={50}>
+            <HeroActionLink
+              action={action}
+              size="md"
+              onClick={onAction(action.platform)}
+            />
+          </FramerWrapper>
+        ))}
       </div>
 
       {/* Scroll indicator */}

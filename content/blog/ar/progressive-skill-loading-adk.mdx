@@ -1,0 +1,201 @@
+---
+title: "التحميل التدريجي للمهارات في Google ADK 2.0: حلّ مشكلة تضخّم السياق في الأنظمة متعدّدة الوكلاء"
+description: "يأتي ADK 2.0 بنمط تحميل ثلاثي الطبقات يُقلّص السياق الأساسي بنحو 90%. في هذه المقالة: البنية، وأنماط المهارات الأربعة، والشيفرة التي ستكتبها فعلاً لتبنّيها في وكلائك."
+date: "2026-04-14"
+tags: ["وكلاء", "نماذج لغوية", "google-adk", "هندسة السياق"]
+featured: true
+image: "/blog/progressive-skill-loading-adk.png"
+---
+
+كلّ نظام متعدّد الوكلاء أوصلتُه إلى الإنتاج اصطدم في النهاية بالجدار نفسه.
+
+تبدأ الأمور نظيفة: وكيل واحد، system prompt قصير، ثلاث أدوات. يعمل الأمر. ثم يطلب أحدهم قدرة جديدة، ثم أخرى. فتُضيف مهارات، وأدوات، وأمثلة، وقصاصات مرجعيّة. فينتفخ الـ system prompt إلى ما فوق 5,000 توكن. يرتفع زمن الاستجابة. ترتفع التكاليف. ويبدأ الوكيل بخلط المهارات، واختيار الأداة الخاطئة، وهلوسة سلوكيات من أقسام لم يحفظها سوى جزئياً.
+
+يُقدّم Google ADK 2.0 نمطاً يعالج هذه المشكلة مباشرةً: **التحميل التدريجي للمهارات**، المبني على مواصفة [agentskills.io](https://agentskills.io) المفتوحة. دمجتُه مؤخّراً في عدّة مشاريع وكلاء، وهو يحلّ المشكلة بشكل نظيف. في هذا المنشور نستعرض البنية، وأنماط المهارات الأربعة التي يدعمها ADK، والشيفرة التي ستكتبها فعلاً.
+
+## الفكرة الأساسية: ثلاث طبقات
+
+بدلاً من تحميل المحتوى الكامل لكلّ مهارة في system prompt عند البدء، يُقسّم ADK كلّ مهارة إلى ثلاث طبقات تُحمَّل عند الطلب.
+
+- **L1، البيانات الوصفية** (نحو 100 توكن لكلّ مهارة). الاسم والوصف فقط. مُحمَّلة دائماً، في كلّ استدعاء. يقرأها الوكيل كجدول محتويات ليُقرّر ما يحتاجه.
+- **L2، التعليمات** (حتى نحو 5,000 توكن لكلّ مهارة). المحتوى الكامل للمهارة: تعليمات خطوة بخطوة، وقواعد، وقيود. تُحمَّل عند الطلب فقط، حين يُقرّر الوكيل أنّه بحاجة لهذه المهارة بالذات.
+- **L3، الموارد** (حجم متفاوت). ملفّات مرجعيّة عميقة: مواصفات API، ودلائل أسلوب، ومخطّطات، وأمثلة كاملة. تُحمَّل فقط حين تستدعيها تعليمات المهارة صراحةً.
+
+الحساب قاسٍ. عشر مهارات بحجم 500 توكن لكلّ منها تُكلّفك نحو 5,000 توكن مسبقاً في prompt متراصّ. بالتحميل التدريجي، تصبح نحو 1,000 توكن من بيانات L1 الوصفيّة. أي **تقليص بنسبة 90% تقريباً للسياق الأساسي**، قبل أن تبدأ المحادثة أصلاً. وهذه النسبة تتحسّن مع كلّ مهارة إضافيّة.
+
+## كيف يربط ADK كلّ هذا
+
+يُتيح ADK التحميل التدريجي عبر صنف واحد، `SkillToolset`، يُولِّد تلقائياً ثلاث أدوات ويُمرّرها إلى الوكيل:
+
+- `list_skills` يُعيد بيانات L1 الوصفيّة لكلّ مهارة مُسجَّلة.
+- `load_skill` يجلب المحتوى الكامل L2 لمهارة بحسب اسمها.
+- `load_skill_resource` يجلب ملفّ مورد L3 محدّد لمهارة معيّنة.
+
+يكتشف الوكيل ما هو متاح (L1)، ويُقرّر ما يحتاجه (L2)، ويسحب المراجع عند الطلب (L3). أنت لا تكتب أيّ منطق تحميل: الـ toolset يتكفّل بذلك.
+
+## أنماط المهارة الأربعة
+
+يُعرّف ADK أربع طرق لكتابة مهارة. كلّها تُنتج نفس المُنتَج وقت التشغيل (مهارة متوافقة مع agentskills.io)، فيُمكنك مزجها بحرّيّة.
+
+![وكيل ADK متّصل بأنماط المهارة الأربعة: inline و file-based و external و meta skill، جميعها معروضة عبر SkillToolset واحد](/blog/adk-skill-patterns.png)
+
+### 1. Inline skills
+
+للقواعد البسيطة المستقرّة التي تتغيّر نادراً، تُعرّف المهارة مباشرةً في Python:
+
+```python
+seo_skill = models.Skill(
+    frontmatter=models.Frontmatter(
+        name="seo-checklist",
+        description="SEO optimization checklist for blog posts. Covers title tags, meta descriptions, heading structure, and readability.",
+    ),
+    instructions=(
+        "When optimizing a blog post for SEO, check each item:\n"
+        "1. Title: 50-60 chars, primary keyword near the start\n"
+        "2. Meta description: 150-160 chars, includes a call-to-action\n"
+        "3. Headings: H2/H3 hierarchy, keywords in 2-3 headings\n"
+        "4. First paragraph: Primary keyword in first 100 words\n"
+        "5. Images: Alt text with keywords, compressed, descriptive names\n"
+        "Review the content against each item and suggest improvements."
+    ),
+)
+```
+
+سريع التكرار. لا I/O ملفّات. جيّد لقوائم التحقّق، وقواعد التنسيق، والسياسات القصيرة.
+
+### 2. File-based skills
+
+حين يتجاوز محتوى المهارة بضع فقرات، أو يحتاج إلى مواد مرجعيّة، تنقلها إلى القرص:
+
+```
+skills/blog-writer/
+├── SKILL.md            # L2: التعليمات
+└── references/
+    └── style-guide.md  # L3: يُحمَّل عند الطلب
+```
+
+`SKILL.md` ملفّ Markdown مع frontmatter بصيغة YAML في البداية (اسم، ووصف، ووسوم اختياريّة). والبقيّة هي محتوى المهارة. تعيش ملفّات المراجع تحت `references/` ولا تُحمَّل إلّا عندما تطلبها تعليمات المهارة.
+
+```python
+blog_writer_skill = load_skill_from_dir(
+    pathlib.Path(__file__).parent / "skills" / "blog-writer"
+)
+```
+
+هذا النمط هو الذي ألجأ إليه أكثر. يجعل التعليمات قابلة للـ versioning، وللمراجعة في PR، ومحمولة بين الوكلاء. يُمكنك مشاركة نفس دليل `skills/` عبر عدّة خدمات دون تكرار للشيفرة.
+
+### 3. External skills
+
+بما أنّ التنسيق يتّبع مواصفة `agentskills.io`، يُمكنك استيراد مهارات كتبها المجتمع. نفس الواجهة، مصدر مختلف:
+
+```python
+content_researcher_skill = load_skill_from_dir(
+    pathlib.Path(__file__).parent / "skills" / "content-research-writer"
+)
+```
+
+مستودعات مثل `awesome-claude-skills` تنشر بالفعل مئات المهارات. تسحب الدليل، وتُراجعه (عامله كاعتماديّة)، وتربطه. مفيد للاهتمامات المتقاطعة مثل نبرة العلامة التجاريّة، وفحوصات الامتثال، ونمط الترجمة، حيث إعادة الاختراع إهدار.
+
+### 4. Meta skills: مصنع المهارات
+
+هذا هو النمط الذي غيّر طريقة تفكيري في الوكلاء.
+
+الـ meta skill هي مهارة مهمّتها **توليد مهارات أخرى أثناء التشغيل**. تُعطي الوكيل مواصفة Agent Skills كمورد L3، ومثالاً متكاملاً، فيُنتج ملفّات `SKILL.md` متوافقة عند الطلب:
+
+```python
+skill_creator = models.Skill(
+    frontmatter=models.Frontmatter(
+        name="skill-creator",
+        description=(
+            "Creates new ADK-compatible skill definitions from requirements."
+            " Generates complete SKILL.md files following the Agent Skills"
+            " specification at agentskills.io."
+        ),
+    ),
+    instructions=(
+        "When asked to create a new skill, generate a complete SKILL.md file.\n\n"
+        "Read `references/skill-spec.md` for the format specification.\n"
+        "Read `references/example-skill.md` for a working example.\n\n"
+        "Follow these rules:\n"
+        "1. Name must be kebab-case, max 64 characters\n"
+        "2. Description must be under 1024 characters\n"
+        "3. Instructions should be clear, step-by-step\n"
+        "4. Reference files in references/ for detailed domain knowledge\n"
+        "5. Keep SKILL.md under 500 lines, put details in references/\n"
+        "6. Output the complete file content the user can save directly\n"
+    ),
+    resources=models.Resources(
+        references={
+            "skill-spec.md": "# Agent Skills Specification (agentskills.io)...",
+            "example-skill.md": "# Example: Code Review Skill...",
+        }
+    ),
+)
+```
+
+اطلب منها "أنشئ مهارة لكتابة مقدّمات لمقالات تقنيّة" فتحصل على ملفّ كامل ومتوافق:
+
+```
+---
+name: blog-intro-writer
+description: Writes compelling technical blog introductions. Hooks the reader
+  with a problem statement, establishes relevance, and previews what they will learn.
+---
+
+When writing a blog introduction, follow this structure:
+1. Open with a specific problem the reader recognizes
+2. State why it matters now (new release, scaling pain, common mistake)
+3. Preview what the post covers in one sentence
+4. Keep it under 100 words
+```
+
+عامل المهارات المُولَّدة كأيّ اعتماديّة شيفرة: راجع الـ diff، وادخل النتيجة إلى git، ولا تنشر مخرجات لم تُقرأ. لكن الحلقة (*الوكيل يُنتج مهارة، الإنسان يُراجع، الوكيل يستخدم المهارة*) هي آليّة تراكم حقيقيّة. يكبر سطح قدرات وكيلك مع الاستخدام.
+
+## تجميع الوكيل
+
+تتعايش الأنماط الأربعة في toolset واحد:
+
+```python
+skill_toolset = SkillToolset(
+    skills=[seo_skill, blog_writer_skill, content_researcher_skill, skill_creator],
+)
+
+root_agent = Agent(
+    model="gemini-2.5-flash",
+    name="blog_skills_agent",
+    description="A blog-writing agent powered by reusable skills.",
+    instruction=(
+        "You are a blog-writing assistant with specialized skills.\n"
+        "Load relevant skills to get detailed instructions.\n"
+        "Use load_skill_resource to access reference materials.\n"
+        "Follow each skill's step-by-step instructions.\n"
+        "Always explain which skill you're using and why."
+    ),
+    tools=[skill_toolset],
+)
+```
+
+يرى النموذج system prompt قصيراً، و toolset واحداً، وقائمة ببيانات المهارات الوصفيّة. يُقرّر ماذا يُحمِّل. وأنت تبقى خارج منطق الـ routing.
+
+## دروس من التطبيق
+
+**الأوصاف هي عقد الـ API.** وصف L1 هو ما يسمح للوكيل بتقرير تحميل مهارة من عدمه. الأوصاف المبهمة ("مساعد محتوى") تُسبّب تحميلات خاطئة أو مهارات مُهملة. كن دقيقاً حول ما تفعله المهارة، والمدخلات المتوقّعة، وصيغة المخرجات. عاملها كـ docstrings تحت الضغط.
+
+**ابدأ inline. انتقل للملفّات عند الحاجة.** من المُغري بناء بنية الملفّات من اليوم الأوّل. لا تفعل. اكتب الإصدار الأوّل inline، وشغّله في استخدامات حقيقيّة، وانتقل إلى الملفّات حين يتجاوز المحتوى نحو 20 سطراً أو حين تحتاج لمراجع.
+
+**File-based هو النقطة الحلوة.** الـ inline يضيق بسرعة. والـ external skills جيّدة لكنّها تتطلّب فحصاً. أمّا الـ file-based فيمنحك مهارات قابلة للـ diff، وللمراجعة في PR، وللاستخدام بين عدّة وكلاء. المكسب التشغيلي يفوق بكثير التكلفة الإرغونوميّة الصغيرة.
+
+**التوافق العابر للمنصّات يهمّ.** مواصفة `agentskills.io` مدعومة من Claude Code وCursor وGemini CLI و40+ أداة أخرى. المهارات المكتوبة لـ ADK ليست محتجزة في منصّة واحدة. هذه النقطة وحدها جعلتني أتوقّف عن كتابة قصاصات prompt ارتجاليّة في كلّ مشروع.
+
+## للختام
+
+يُعطينا التحميل التدريجي أخيراً وسيلة للتوقّف عن معاملة الـ system prompt كصندوق نفايات. التحوّل الأساسي بسيط: **حمِّل الفهرس، اجلب الفصل، راجع المرجع**، بالطريقة التي يعمل بها البشر فعلاً.
+
+إن كنتَ تنشر أنظمة متعدّدة الوكلاء وتشعر بضيق ميزانيّة السياق، فإنّ وثائق ADK Skills هي ما سأبدأ به.
+
+---
+
+**المراجع**
+
+- [Developer's guide to building ADK agents with skills، مدوّنة مطوّري Google](https://developers.googleblog.com/developers-guide-to-building-adk-agents-with-skills/)
+- [مواصفة Agent Skills، agentskills.io](https://agentskills.io)

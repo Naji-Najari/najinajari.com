@@ -3,6 +3,7 @@
 import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
+import { useTrack } from "@/hooks/use-track";
 
 const locales = [
   { code: "en", flag: "🇬🇧", label: "English" },
@@ -16,6 +17,7 @@ export function LanguageSwitcher() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const track = useTrack();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -32,6 +34,7 @@ export function LanguageSwitcher() {
       setOpen(false);
       return;
     }
+    track("language_switch", { from: locale, to: newLocale });
     const segments = pathname.split("/");
     if (["en", "fr", "ar"].includes(segments[1])) {
       segments[1] = newLocale;

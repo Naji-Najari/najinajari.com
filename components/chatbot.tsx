@@ -8,6 +8,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTrack } from "@/hooks/use-track";
 
 interface Message {
   role: "user" | "assistant";
@@ -40,40 +41,45 @@ function CopyButton({ text }: { text: string }) {
 
 const SESSION_STORAGE_KEY = "nn_chat_session";
 
+function newSessionId(): string {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `s_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
 /**
  * Returns a stable session identifier persisted in localStorage so that
  * Langfuse groups every chat turn from the same browser into a single
- * conversation trace group.
+ * conversation trace group. Falls back to an in-memory id when storage is
+ * unavailable (Safari private browsing, disabled cookies).
  */
 function getOrCreateSessionId(): string {
   if (typeof window === "undefined") return "";
-  const existing = window.localStorage.getItem(SESSION_STORAGE_KEY);
-  if (existing) return existing;
-  const fresh =
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `s_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-  window.localStorage.setItem(SESSION_STORAGE_KEY, fresh);
-  return fresh;
+  try {
+    const existing = window.localStorage.getItem(SESSION_STORAGE_KEY);
+    if (existing) return existing;
+    const fresh = newSessionId();
+    window.localStorage.setItem(SESSION_STORAGE_KEY, fresh);
+    return fresh;
+  } catch {
+    return newSessionId();
+  }
 }
 
 export default function Chatbot() {
   const t = useTranslations("chatbot");
   const locale = useLocale();
+  const track = useTrack();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
   const [followUps, setFollowUps] = useState<string[]>([]);
-  const [sessionId, setSessionId] = useState("");
+  const [sessionId] = useState(() => getOrCreateSessionId());
   const abortRef = useRef<AbortController | null>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    setSessionId(getOrCreateSessionId());
-  }, []);
 
   const scrollToBottom = useCallback(() => {
     if (viewportRef.current) {
@@ -101,6 +107,12 @@ export default function Chatbot() {
 
   const sendMessage = async (content: string) => {
     if (!content.trim() || isStreaming) return;
+
+    track("chatbot_message_sent", {
+      length: content.trim().length,
+      turn_number: Math.floor(messages.length / 2) + 1,
+      locale,
+    });
 
     const userMessage: Message = { role: "user", content: content.trim() };
     const newMessages = [...messages, userMessage];
@@ -168,7 +180,14 @@ export default function Chatbot() {
       setFollowUps(newFollowUps);
       setStreamingContent("");
     } catch (error) {
-      if ((error as Error).name !== "AbortError") {
+      const err = error as Error;
+      if (err.name !== "AbortError") {
+        track("chatbot_error", {
+          kind: err.name || "unknown",
+          message: err.message?.slice(0, 80) ?? "",
+          turn_number: Math.floor(messages.length / 2) + 1,
+          locale,
+        });
         setMessages((prev) => [
           ...prev,
           { role: "assistant", content: "Sorry, something went wrong. Please try again." },
@@ -195,7 +214,10 @@ export default function Chatbot() {
     <>
       {/* Floating Button - exact FeedLake style */}
       <Button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          if (!isOpen) track("chatbot_open", { locale });
+          setIsOpen(!isOpen);
+        }}
         size="lg"
         className={cn(
           "fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50",

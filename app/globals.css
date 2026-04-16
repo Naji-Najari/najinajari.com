@@ -180,6 +180,15 @@
   transform: translateY(2px);
 }
 
+/* Code blocks always LTR, even in RTL locales (Arabic) */
+.prose pre,
+.prose pre code,
+.prose :not(pre) > code {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: isolate;
+}
+
 /* Timeline point with glow */
 .timeline-point {
   position: relative;

@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
-import { ThemeProvider } from "@/components/theme-provider";
+import { cookies } from "next/headers";
+import { ThemeProvider, THEME_COOKIE, type Theme } from "@/components/theme-provider";
 import { AptabaseClient } from "@/components/analytics/aptabase-client";
 import { PostHogProvider, PostHogPageView } from "@/components/analytics/posthog-provider";
 import { Suspense } from "react";
-import { routing } from "@/i18n/routing";
+import { routing, type Locale } from "@/i18n/routing";
 import { notFound } from "next/navigation";
+
+function parseThemeCookie(value: string | undefined): Theme {
+  if (value === "light" || value === "dark" || value === "system") return value;
+  return "light";
+}
 
 type LocaleParams = { locale: string };
 
@@ -16,7 +22,7 @@ export async function generateMetadata({
   params: Promise<LocaleParams>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  if (!routing.locales.includes(locale as "en" | "fr" | "ar")) {
+  if (!routing.locales.includes(locale as Locale)) {
     return {};
   }
   const t = await getTranslations({ locale, namespace: "metadata" });
@@ -85,22 +91,27 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
 
-  if (!routing.locales.includes(locale as "en" | "fr" | "ar")) {
+  if (!routing.locales.includes(locale as Locale)) {
     notFound();
   }
 
   const messages = (await import(`../../messages/${locale}.json`)).default;
   const dir = locale === "ar" ? "rtl" : "ltr";
 
+  const cookieStore = await cookies();
+  const initialTheme = parseThemeCookie(cookieStore.get(THEME_COOKIE)?.value);
+  const htmlClass = `font-sans${initialTheme === "dark" ? " dark" : ""}`;
+
   return (
-    <html lang={locale} dir={dir} className="font-sans" suppressHydrationWarning>
+    <html
+      lang={locale}
+      dir={dir}
+      className={htmlClass}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <body className="min-h-screen antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider initialTheme={initialTheme}>
           <PostHogProvider>
             <Suspense fallback={null}>
               <PostHogPageView />
