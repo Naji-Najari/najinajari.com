@@ -1,49 +1,199 @@
 ---
-title: "Chargement progressif des skills : comment Google ADK 2.0 résout le bloat de contexte des systèmes multi-agents"
-description: "La plupart des systèmes multi-agents s'effondrent sous le poids de leur propre system prompt. Le chargement en trois couches d'ADK 2.0 réduit le contexte de base d'environ 90 %. Voici comment et pourquoi ça compte."
+title: "Progressive skill loading dans Google ADK 2.0 : en finir avec le bloat de contexte des systèmes multi-agents"
+description: "ADK 2.0 embarque un pattern de chargement en trois couches qui réduit d'environ 90 % le contexte de base. Architecture, quatre patterns de skills, et le code que tu écrirais vraiment pour l'intégrer."
 date: "2026-04-14"
 tags: ["agents", "llm", "google-adk", "ingénierie-de-contexte"]
 featured: true
 image: "/blog/progressive-skill-loading-adk.png"
 ---
 
-Tous les systèmes multi-agents sur lesquels j'ai travaillé finissent par se heurter au même mur.
+Tous les systèmes multi-agents que j'ai mis en prod finissent par buter sur le même mur.
 
-On ajoute des tools, des skills, du contexte dans le system prompt. Au début ça marche. Puis la liste d'instructions grossit — et l'agent se perd, la latence grimpe, les coûts explosent.
+Ça part propre : un agent, un system prompt court, trois tools. Ça marche. Puis quelqu'un demande une nouvelle capability, puis une autre. Tu ajoutes des skills, des tools, des exemples, des bouts de référence. Le system prompt gonfle à 5 000+ tokens. La latence monte. Les coûts montent. L'agent commence à confondre ses skills, choisir le mauvais tool, halluciner des comportements à partir de sections du prompt qu'il n'a que partiellement mémorisées.
 
-Google ADK 2.0 propose un pattern qui attaque ce problème de front : le **chargement progressif des skills**.
+Google ADK 2.0 propose un pattern qui attaque ce problème de front : le **progressive skill loading**, construit sur la spec ouverte [agentskills.io](https://agentskills.io). Je l'intègre sur plusieurs projets d'agents en ce moment et ça règle le problème proprement. Ce post passe en revue l'architecture, les quatre patterns de skills supportés, et le code que tu écrirais vraiment.
 
-## L'idée
+## L'idée centrale : trois couches
 
-Plutôt que de charger toutes les instructions d'un coup (souvent plus de 10 000 tokens), les skills sont chargés en trois couches :
+Au lieu de charger le corps complet de chaque skill dans le system prompt au démarrage, ADK découpe chaque skill en trois niveaux chargés à la demande.
 
-- **L1 — Metadata.** Uniquement le nom et la description, ~50 tokens par skill. Chargé à chaque requête. L'agent lit ça comme un menu et choisit ce qui est pertinent.
-- **L2 — Instructions.** Le corps complet du skill, ~500 tokens. Chargé à la demande, uniquement quand l'agent décide d'en avoir besoin.
-- **L3 — Resources.** Fichiers de référence profonds — specs d'API, guides de style, schémas. Chargés seulement si les instructions du skill les réclament.
+- **L1, Metadata** (environ 100 tokens par skill). Nom et description uniquement. Toujours chargé, à chaque appel. L'agent lit ça comme une table des matières pour décider de quoi il a besoin.
+- **L2, Instructions** (jusqu'à environ 5 000 tokens par skill). Le corps complet du skill : instructions pas à pas, heuristiques, contraintes. Chargé à la demande, uniquement quand l'agent décide qu'il en a besoin.
+- **L3, Resources** (taille variable). Fichiers de référence profonds : specs d'API, guides de style, schémas, exemples complets. Chargés uniquement si les instructions du skill les réclament explicitement.
 
-Avec 10 skills, ça donne environ **1 000 tokens au démarrage au lieu de 10 000**. Une réduction de 90 % du contexte de base — avant même que la conversation commence.
+Le calcul est brutal. Dix skills de 500 tokens chacun coûtent environ 5 000 tokens upfront dans un prompt monolithique. En progressive disclosure, c'est environ 1 000 tokens de L1 metadata. Soit **une réduction d'environ 90 % du contexte de base**, avant même que la conversation commence. Le ratio s'améliore à chaque skill supplémentaire.
+
+## Comment ADK câble ça
+
+ADK expose le progressive disclosure via une seule classe, `SkillToolset`, qui génère automatiquement trois tools et les passe à l'agent :
+
+- `list_skills` renvoie la metadata L1 de tous les skills enregistrés.
+- `load_skill` récupère le corps L2 complet d'un skill par son nom.
+- `load_skill_resource` récupère un fichier de ressource L3 pour un skill donné.
+
+L'agent découvre ce qui existe (L1), décide ce dont il a besoin (L2), et va chercher les références à la demande (L3). Tu n'écris aucune logique de chargement : le toolset s'en charge.
 
 ## Quatre patterns de skill
 
-ADK définit également quatre façons d'écrire un skill :
+ADK définit quatre façons d'écrire un skill. Ils produisent tous le même artefact runtime (un skill conforme à agentskills.io), donc tu peux les mélanger librement.
 
-1. **Inline** — défini directement dans le code. Bien pour les skills simples et légers.
-2. **File-based** — des fichiers `SKILL.md` chargés depuis le disque. Détaillés, réutilisables.
-3. **External** — importés depuis des dépôts communautaires. Même API, autre source.
-4. **Meta skill** — un skill qui génère d'autres skills à l'exécution.
+### 1. Inline skills
 
-Le dernier est le plus intéressant. Une *skill factory* qui crée de l'expertise domaine à la demande, en suivant la spec Agent Skills. Ça inverse le modèle habituel : au lieu de pré-définir tout ce dont l'agent pourrait avoir besoin, on le laisse composer son expertise quand la tâche l'exige.
+Pour des règles simples et stables qui changent peu, on définit le skill directement en Python :
 
-## Pourquoi ça compte
+```python
+seo_skill = models.Skill(
+    frontmatter=models.Frontmatter(
+        name="seo-checklist",
+        description="SEO optimization checklist for blog posts. Covers title tags, meta descriptions, heading structure, and readability.",
+    ),
+    instructions=(
+        "When optimizing a blog post for SEO, check each item:\n"
+        "1. Title: 50-60 chars, primary keyword near the start\n"
+        "2. Meta description: 150-160 chars, includes a call-to-action\n"
+        "3. Headings: H2/H3 hierarchy, keywords in 2-3 headings\n"
+        "4. First paragraph: Primary keyword in first 100 words\n"
+        "5. Images: Alt text with keywords, compressed, descriptive names\n"
+        "Review the content against each item and suggest improvements."
+    ),
+)
+```
 
-On empile depuis des années de la charge cognitive sur les LLMs comme on empilait tout dans `main()`. Ça marchait tant que les modèles étaient tolérants. Avec des conversations plus longues, plus de tools et des budgets de latence plus serrés, ça ne passe plus.
+Rapide à itérer. Pas d'I/O fichier. Bien pour les checklists, les règles de formatage, les policies courtes.
 
-Le chargement progressif colle à la façon dont les humains travaillent vraiment : on scanne une table des matières, on lit le chapitre qu'il nous faut, on consulte la référence. Les agents devraient faire pareil.
+### 2. File-based skills
 
-Curieux de savoir si quelqu'un a implémenté un équivalent hors d'ADK. Si c'est ton cas, je serais ravi d'en discuter.
+Quand un skill dépasse quelques paragraphes, ou s'il a besoin de matériel de référence, tu le déportes sur disque :
+
+```
+skills/blog-writer/
+├── SKILL.md            # L2 : instructions
+└── references/
+    └── style-guide.md  # L3 : chargé à la demande
+```
+
+`SKILL.md` est un Markdown avec un frontmatter YAML en tête (nom, description, tags optionnels). Le reste est le corps du skill. Les fichiers de référence vivent sous `references/` et ne sont chargés que quand les instructions du skill le demandent.
+
+```python
+blog_writer_skill = load_skill_from_dir(
+    pathlib.Path(__file__).parent / "skills" / "blog-writer"
+)
+```
+
+C'est le pattern vers lequel je me tourne le plus. Il rend les instructions versionnables, reviewables en PR, et portables entre agents. Tu peux partager le même dossier `skills/` entre plusieurs services sans duplication de code.
+
+### 3. External skills
+
+Comme le format suit la spec `agentskills.io`, tu peux importer des skills écrits par la communauté. Même API, autre source :
+
+```python
+content_researcher_skill = load_skill_from_dir(
+    pathlib.Path(__file__).parent / "skills" / "content-research-writer"
+)
+```
+
+Des dépôts comme `awesome-claude-skills` publient déjà des centaines de skills. Tu récupères le dossier, tu le review (traite-le comme une dépendance), tu le câbles. Utile pour les préoccupations transverses comme le ton de marque, les checks de compliance, ou le style de traduction, où réinventer c'est du gâchis.
+
+### 4. Meta skills : la skill factory
+
+C'est le pattern qui change ma façon de penser les agents.
+
+Un meta skill est un skill dont le job est de **générer d'autres skills à l'exécution**. Tu donnes à l'agent la spec Agent Skills en L3, plus un exemple complet, et il produit des `SKILL.md` conformes à la demande :
+
+```python
+skill_creator = models.Skill(
+    frontmatter=models.Frontmatter(
+        name="skill-creator",
+        description=(
+            "Creates new ADK-compatible skill definitions from requirements."
+            " Generates complete SKILL.md files following the Agent Skills"
+            " specification at agentskills.io."
+        ),
+    ),
+    instructions=(
+        "When asked to create a new skill, generate a complete SKILL.md file.\n\n"
+        "Read `references/skill-spec.md` for the format specification.\n"
+        "Read `references/example-skill.md` for a working example.\n\n"
+        "Follow these rules:\n"
+        "1. Name must be kebab-case, max 64 characters\n"
+        "2. Description must be under 1024 characters\n"
+        "3. Instructions should be clear, step-by-step\n"
+        "4. Reference files in references/ for detailed domain knowledge\n"
+        "5. Keep SKILL.md under 500 lines, put details in references/\n"
+        "6. Output the complete file content the user can save directly\n"
+    ),
+    resources=models.Resources(
+        references={
+            "skill-spec.md": "# Agent Skills Specification (agentskills.io)...",
+            "example-skill.md": "# Example: Code Review Skill...",
+        }
+    ),
+)
+```
+
+Tu lui demandes "crée un skill pour écrire des intros de blog techniques" et tu récupères un fichier complet et valide :
+
+```
+---
+name: blog-intro-writer
+description: Writes compelling technical blog introductions. Hooks the reader
+  with a problem statement, establishes relevance, and previews what they will learn.
+---
+
+When writing a blog introduction, follow this structure:
+1. Open with a specific problem the reader recognizes
+2. State why it matters now (new release, scaling pain, common mistake)
+3. Preview what the post covers in one sentence
+4. Keep it under 100 words
+```
+
+Traite les skills générés comme n'importe quelle dépendance de code : review le diff, commit dans git, ne déploie pas d'output non relu. Mais la boucle (*agent produit skill, humain review, agent utilise skill*) est un vrai mécanisme de composition. La surface de capacités de ton agent grandit avec l'usage.
+
+## Assembler l'agent
+
+Les quatre patterns coexistent dans un seul toolset :
+
+```python
+skill_toolset = SkillToolset(
+    skills=[seo_skill, blog_writer_skill, content_researcher_skill, skill_creator],
+)
+
+root_agent = Agent(
+    model="gemini-2.5-flash",
+    name="blog_skills_agent",
+    description="A blog-writing agent powered by reusable skills.",
+    instruction=(
+        "You are a blog-writing assistant with specialized skills.\n"
+        "Load relevant skills to get detailed instructions.\n"
+        "Use load_skill_resource to access reference materials.\n"
+        "Follow each skill's step-by-step instructions.\n"
+        "Always explain which skill you're using and why."
+    ),
+    tools=[skill_toolset],
+)
+```
+
+Le modèle voit un system prompt court, un toolset unique, et un menu de metadata de skills. Il décide quoi charger. Tu restes hors du routing logic.
+
+## Quelques leçons tirées de la pratique
+
+**Les descriptions sont le contrat d'API.** La description L1 est ce qui permet à l'agent de décider s'il charge ou non un skill. Des descriptions vagues ("helper de contenu") causent des mauvais chargements ou des skills ignorés. Sois précis sur ce que ça fait, les inputs attendus, le format de sortie. Traite-les comme des docstrings sous pression.
+
+**Commence inline. Passe aux fichiers quand c'est nécessaire.** C'est tentant de monter le répertoire file-based dès le jour 1. Ne le fais pas. Inline la première version, exerce-la dans de vrais runs, passe aux fichiers quand le corps dépasse environ 20 lignes ou quand tu as besoin de références.
+
+**File-based est le sweet spot.** L'inline devient vite serré. Les external skills sont bien mais demandent du vetting. Le file-based te donne des skills diffables, reviewables en PR, et réutilisables entre agents. Le gain opérationnel dépasse largement le coût ergonomique.
+
+**Le cross-platform compte.** La spec `agentskills.io` est supportée par Claude Code, Cursor, Gemini CLI, et 40+ autres outils. Les skills écrits pour ADK ne sont pas enfermés. À lui seul, ce point m'a fait arrêter d'écrire des fragments de prompt ad-hoc dans chaque projet.
+
+## Pour conclure
+
+Le progressive disclosure nous donne enfin une façon d'arrêter de traiter le system prompt comme un fourre-tout. Le shift de fond est simple : **charger l'index, récupérer le chapitre, consulter la référence**, comme les humains travaillent réellement.
+
+Si tu ships des systèmes multi-agents et que tu sens le budget contexte se resserrer, la doc ADK Skills est par où je commencerais.
 
 ---
 
 **Références**
 
-- [Developer's guide to building ADK agents with skills — Google Developers Blog](https://developers.googleblog.com/developers-guide-to-building-adk-agents-with-skills/)
+- [Developer's guide to building ADK agents with skills, Google Developers Blog](https://developers.googleblog.com/developers-guide-to-building-adk-agents-with-skills/)
+- [Spécification Agent Skills, agentskills.io](https://agentskills.io)

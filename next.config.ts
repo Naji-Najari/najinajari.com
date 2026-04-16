@@ -7,7 +7,15 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 const withMDX = createMDX({
   options: {
     remarkPlugins: [["remark-frontmatter", { type: "yaml", marker: "-" }]],
-    rehypePlugins: [],
+    rehypePlugins: [
+      [
+        "@shikijs/rehype",
+        {
+          theme: "github-dark-default",
+          addLanguageClass: true,
+        },
+      ],
+    ],
   },
 });
 
