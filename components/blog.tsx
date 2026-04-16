@@ -3,7 +3,8 @@ import { ArrowRight } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { BlogCarousel } from "@/components/blog-carousel";
-import { getAllPosts, type Locale } from "@/lib/blog";
+import { getAllPosts } from "@/lib/blog";
+import type { Locale } from "@/i18n/routing";
 
 const PREVIEW_COUNT = 5;
 
@@ -34,6 +35,7 @@ export default async function Blog() {
             readMoreLabel={t("read_more")}
             prevLabel={t("prev")}
             nextLabel={t("next")}
+            regionLabel={t("carousel_label")}
           />
         </BlurFade>
 

@@ -6,8 +6,8 @@ import Footer from "@/components/footer";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { BlogCard } from "@/components/blog-card";
 import { GridBackground } from "@/components/grid-background";
-import { getAllPosts, type Locale } from "@/lib/blog";
-import { routing } from "@/i18n/routing";
+import { getAllPosts } from "@/lib/blog";
+import { routing, type Locale } from "@/i18n/routing";
 
 type Params = { locale: string };
 

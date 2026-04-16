@@ -129,6 +129,7 @@
     "no_posts": "No articles published yet — stay tuned.",
     "prev": "Previous articles",
     "next": "Next articles",
+    "carousel_label": "Latest blog articles",
     "metadata_title": "Blog — Naji Najari",
     "metadata_description": "Essays and notes on AI engineering, RAG systems, and shipping LLM products by Naji Najari."
   }

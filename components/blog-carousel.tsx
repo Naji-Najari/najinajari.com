@@ -10,6 +10,7 @@ interface BlogCarouselProps {
   readMoreLabel: string;
   prevLabel: string;
   nextLabel: string;
+  regionLabel: string;
 }
 
 export function BlogCarousel({
@@ -17,6 +18,7 @@ export function BlogCarousel({
   readMoreLabel,
   prevLabel,
   nextLabel,
+  regionLabel,
 }: BlogCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [canPrev, setCanPrev] = useState(false);
@@ -78,7 +80,22 @@ export function BlogCarousel({
 
       <div
         ref={scrollerRef}
-        className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 -mx-6 px-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        role="region"
+        aria-label={regionLabel}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          const rtl =
+            typeof document !== "undefined" &&
+            document.documentElement.dir === "rtl";
+          if (e.key === "ArrowRight") {
+            e.preventDefault();
+            scroll(rtl ? "prev" : "next");
+          } else if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            scroll(rtl ? "next" : "prev");
+          }
+        }}
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 -mx-6 px-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 rounded-lg"
       >
         {posts.map((post) => (
           <div

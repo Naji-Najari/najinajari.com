@@ -15,6 +15,7 @@ type EventName =
   | "blog_card_click"
   | "chatbot_open"
   | "chatbot_message_sent"
+  | "chatbot_error"
   | "contact_submit";
 
 function sanitize(props?: EventProps) {

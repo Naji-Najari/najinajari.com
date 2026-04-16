@@ -129,6 +129,7 @@
     "no_posts": "Aucun article publié pour l'instant — à bientôt.",
     "prev": "Articles précédents",
     "next": "Articles suivants",
+    "carousel_label": "Derniers articles du blog",
     "metadata_title": "Blog — Naji Najari",
     "metadata_description": "Essais et notes sur l'ingénierie IA, les systèmes RAG et la mise en production de produits LLM par Naji Najari."
   }

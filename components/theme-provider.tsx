@@ -19,37 +19,54 @@ interface ThemeContextValue {
   setTheme: (theme: Theme) => void;
 }
 
-const STORAGE_KEY = "theme";
+export const THEME_COOKIE = "theme";
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 const ThemeContext = createContext<ThemeContextValue | null>(null);
+
+function readCookieTheme(fallback: Theme): Theme {
+  if (typeof document === "undefined") return fallback;
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${THEME_COOKIE}=([^;]+)`),
+  );
+  const value = match?.[1];
+  if (value === "light" || value === "dark" || value === "system") return value;
+  return fallback;
+}
+
+function writeCookieTheme(theme: Theme) {
+  if (typeof document === "undefined") return;
+  document.cookie = `${THEME_COOKIE}=${theme}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax`;
+}
+
+function readSystemTheme(): ResolvedTheme {
+  if (typeof window === "undefined") return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
 
 export function ThemeProvider({
   children,
+  initialTheme,
   defaultTheme = "light",
 }: {
   children: ReactNode;
+  /** Theme resolved on the server from the cookie (hydration-safe). */
+  initialTheme?: Theme;
   defaultTheme?: Theme;
 }) {
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
-  const [systemTheme, setSystemThemeState] =
-    useState<ResolvedTheme>("light");
-  const [mounted, setMounted] = useState(false);
+  const [theme, setThemeState] = useState<Theme>(
+    () => initialTheme ?? readCookieTheme(defaultTheme),
+  );
+  const [systemTheme, setSystemThemeState] = useState<ResolvedTheme>(() =>
+    readSystemTheme(),
+  );
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-      if (stored === "light" || stored === "dark" || stored === "system") {
-        setThemeState(stored);
-      }
-    } catch {
-      // storage unavailable
-    }
-
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const updateSystem = () =>
       setSystemThemeState(mq.matches ? "dark" : "light");
-    updateSystem();
     mq.addEventListener("change", updateSystem);
-    setMounted(true);
     return () => mq.removeEventListener("change", updateSystem);
   }, []);
 
@@ -57,19 +74,14 @@ export function ThemeProvider({
     theme === "system" ? systemTheme : theme;
 
   useEffect(() => {
-    if (!mounted) return;
     document.documentElement.classList.toggle(
       "dark",
       resolvedTheme === "dark",
     );
-  }, [mounted, resolvedTheme]);
+  }, [resolvedTheme]);
 
   const setTheme = useCallback((next: Theme) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      // storage unavailable
-    }
+    writeCookieTheme(next);
     setThemeState(next);
   }, []);
 
@@ -85,18 +97,7 @@ export function ThemeProvider({
 export function useTheme(): ThemeContextValue {
   const ctx = useContext(ThemeContext);
   if (!ctx) {
-    return {
-      theme: "light",
-      resolvedTheme: "light",
-      systemTheme: "light",
-      setTheme: () => {},
-    };
+    throw new Error("useTheme must be used within <ThemeProvider>");
   }
   return ctx;
 }
-
-/**
- * Inline script body injected server-side into <head>, runs before hydration
- * to prevent theme flash (FOUC). Reads localStorage, sets class="dark" on <html>.
- */
-export const themeInitScript = `(function(){try{var t=localStorage.getItem('${STORAGE_KEY}')||'light';var d=t==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):t;if(d==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`;

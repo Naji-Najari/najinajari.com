@@ -2,7 +2,7 @@ import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 import { MdxImage } from "@/components/mdx-image";
 
-export function useMDXComponents(components: MDXComponents): MDXComponents {
+export function useMDXComponents(): MDXComponents {
   return {
     img: (props) => <MdxImage src={props.src} alt={props.alt} />,
     a: ({ href, children, ...rest }) => {
@@ -19,6 +19,5 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         </a>
       );
     },
-    ...components,
   };
 }

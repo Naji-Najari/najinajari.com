@@ -7,14 +7,10 @@ import Dock from "@/components/dock";
 import Footer from "@/components/footer";
 import { BlogCover } from "@/components/blog-cover";
 import { GridBackground } from "@/components/grid-background";
-import { getAllSlugs, getPostBySlug, type Locale } from "@/lib/blog";
-import { routing } from "@/i18n/routing";
+import { getAllSlugs, getPostBySlug } from "@/lib/blog";
+import { routing, type Locale } from "@/i18n/routing";
 
-type Params = { locale: string; slug: string };
-
-function assertLocale(value: string): asserts value is Locale {
-  if (!routing.locales.includes(value as Locale)) notFound();
-}
+type Params = { locale: Locale; slug: string };
 
 function formatDate(iso: string, locale: string) {
   if (!iso) return "";
@@ -45,7 +41,6 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  assertLocale(locale);
   const post = await getPostBySlug(locale, slug);
   if (!post) return {};
   return {
@@ -77,8 +72,6 @@ export default async function BlogArticlePage({
   params: Promise<Params>;
 }) {
   const { locale, slug } = await params;
-  assertLocale(locale);
-
   const post = await getPostBySlug(locale, slug);
   if (!post) notFound();
 

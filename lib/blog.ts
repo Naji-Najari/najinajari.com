@@ -1,12 +1,13 @@
 import "server-only";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { cache } from "react";
 import matter from "gray-matter";
 import readingTime from "reading-time";
 import { imageSize } from "image-size";
-import { routing } from "@/i18n/routing";
+import type { Locale } from "@/i18n/routing";
 
-export type Locale = (typeof routing.locales)[number];
+export type { Locale };
 
 export interface PostMeta {
   slug: string;
@@ -60,32 +61,33 @@ async function readMeta(locale: Locale, file: string): Promise<PostMeta> {
   };
 }
 
-export async function getAllPosts(locale: Locale): Promise<PostMeta[]> {
-  try {
-    const files = await fs.readdir(path.join(BLOG_DIR, locale));
-    const posts = await Promise.all(
-      files
-        .filter((f) => f.endsWith(".mdx"))
-        .map((f) => readMeta(locale, f)),
-    );
-    return posts.sort((a, b) => b.date.localeCompare(a.date));
-  } catch {
-    return [];
-  }
-}
+export const getAllPosts = cache(
+  async (locale: Locale): Promise<PostMeta[]> => {
+    try {
+      const files = await fs.readdir(path.join(BLOG_DIR, locale));
+      const posts = await Promise.all(
+        files
+          .filter((f) => f.endsWith(".mdx"))
+          .map((f) => readMeta(locale, f)),
+      );
+      return posts.sort((a, b) => b.date.localeCompare(a.date));
+    } catch {
+      return [];
+    }
+  },
+);
 
-export async function getPostBySlug(
-  locale: Locale,
-  slug: string,
-): Promise<PostMeta | null> {
-  try {
-    return await readMeta(locale, `${slug}.mdx`);
-  } catch {
-    return null;
-  }
-}
+export const getPostBySlug = cache(
+  async (locale: Locale, slug: string): Promise<PostMeta | null> => {
+    try {
+      return await readMeta(locale, `${slug}.mdx`);
+    } catch {
+      return null;
+    }
+  },
+);
 
-export async function getAllSlugs(locale: Locale): Promise<string[]> {
+export const getAllSlugs = cache(async (locale: Locale): Promise<string[]> => {
   try {
     const files = await fs.readdir(path.join(BLOG_DIR, locale));
     return files
@@ -94,4 +96,4 @@ export async function getAllSlugs(locale: Locale): Promise<string[]> {
   } catch {
     return [];
   }
-}
+});

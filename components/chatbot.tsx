@@ -41,21 +41,29 @@ function CopyButton({ text }: { text: string }) {
 
 const SESSION_STORAGE_KEY = "nn_chat_session";
 
+function newSessionId(): string {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `s_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
 /**
  * Returns a stable session identifier persisted in localStorage so that
  * Langfuse groups every chat turn from the same browser into a single
- * conversation trace group.
+ * conversation trace group. Falls back to an in-memory id when storage is
+ * unavailable (Safari private browsing, disabled cookies).
  */
 function getOrCreateSessionId(): string {
   if (typeof window === "undefined") return "";
-  const existing = window.localStorage.getItem(SESSION_STORAGE_KEY);
-  if (existing) return existing;
-  const fresh =
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `s_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-  window.localStorage.setItem(SESSION_STORAGE_KEY, fresh);
-  return fresh;
+  try {
+    const existing = window.localStorage.getItem(SESSION_STORAGE_KEY);
+    if (existing) return existing;
+    const fresh = newSessionId();
+    window.localStorage.setItem(SESSION_STORAGE_KEY, fresh);
+    return fresh;
+  } catch {
+    return newSessionId();
+  }
 }
 
 export default function Chatbot() {
@@ -68,14 +76,10 @@ export default function Chatbot() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
   const [followUps, setFollowUps] = useState<string[]>([]);
-  const [sessionId, setSessionId] = useState("");
+  const [sessionId] = useState(() => getOrCreateSessionId());
   const abortRef = useRef<AbortController | null>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    setSessionId(getOrCreateSessionId());
-  }, []);
 
   const scrollToBottom = useCallback(() => {
     if (viewportRef.current) {
@@ -106,7 +110,7 @@ export default function Chatbot() {
 
     track("chatbot_message_sent", {
       length: content.trim().length,
-      turn_number: messages.length / 2 + 1,
+      turn_number: Math.floor(messages.length / 2) + 1,
       locale,
     });
 
@@ -176,7 +180,14 @@ export default function Chatbot() {
       setFollowUps(newFollowUps);
       setStreamingContent("");
     } catch (error) {
-      if ((error as Error).name !== "AbortError") {
+      const err = error as Error;
+      if (err.name !== "AbortError") {
+        track("chatbot_error", {
+          kind: err.name || "unknown",
+          message: err.message?.slice(0, 80) ?? "",
+          turn_number: Math.floor(messages.length / 2) + 1,
+          locale,
+        });
         setMessages((prev) => [
           ...prev,
           { role: "assistant", content: "Sorry, something went wrong. Please try again." },
