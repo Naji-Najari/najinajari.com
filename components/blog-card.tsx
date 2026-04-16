@@ -2,23 +2,13 @@ import { ArrowUpRight, CalendarDays, Clock3 } from "lucide-react";
 import { MagicCard } from "@/components/ui/magic-card";
 import { BlogCover } from "@/components/blog-cover";
 import { BlogCardLink } from "@/components/blog-card-link";
+import { formatDate } from "@/lib/format";
 import type { PostMeta } from "@/lib/blog";
 
 interface BlogCardProps {
   post: PostMeta;
   readMoreLabel: string;
   source: "carousel" | "listing";
-}
-
-function formatDate(iso: string, locale: string) {
-  if (!iso) return "";
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(date);
 }
 
 export function BlogCard({ post, readMoreLabel, source }: BlogCardProps) {

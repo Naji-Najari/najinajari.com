@@ -12,6 +12,7 @@ import { TextEffect } from "@/components/animation/text-effect";
 import TextRotator from "@/components/animation/text-rotator";
 import HackerBtn from "@/components/animation/hacker-btn";
 import { useTrack } from "@/hooks/use-track";
+import { logoUrl } from "@/lib/logo";
 
 const stackTags = [
   { name: "LangGraph", domain: "langchain.com" },
@@ -29,15 +30,30 @@ const stackTags = [
   { name: "HuggingFace", domain: "huggingface.co" },
 ];
 
-const logoUrl = (domain: string) =>
-  `https://img.logo.dev/${domain}?token=${process.env.NEXT_PUBLIC_LOGO_DEV_API_KEY}&size=64`;
-
 const iconMap: Record<string, React.ElementType> = {
   Linkedin: FaLinkedinIn,
   Github: FaGithub,
   GraduationCap: FaGraduationCap,
   Mail,
 };
+
+function StackTagBadge({
+  name,
+  domain,
+}: {
+  name: string;
+  domain: string | null;
+}) {
+  const src = domain ? logoUrl(domain) : "";
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors cursor-default">
+      {src && (
+        <img src={src} alt={name} className="size-4 rounded-sm" loading="lazy" />
+      )}
+      {name}
+    </span>
+  );
+}
 
 type HeroAction = {
   key: string;
@@ -183,19 +199,11 @@ export default function Hero() {
           {/* Stack tags */}
           <div className="mt-12 flex flex-wrap gap-2 max-w-2xl">
             {stackTags.map((tag) => (
-              <span
+              <StackTagBadge
                 key={tag.name}
-                className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors cursor-default"
-              >
-                {tag.domain && (
-                  <img
-                    src={logoUrl(tag.domain)}
-                    alt={tag.name}
-                    className="size-4 rounded-sm"
-                  />
-                )}
-                {tag.name}
-              </span>
+                name={tag.name}
+                domain={tag.domain}
+              />
             ))}
           </div>
 

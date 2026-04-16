@@ -8,9 +8,7 @@ import { MagicCard } from "@/components/ui/magic-card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useTrack } from "@/hooks/use-track";
-
-const logoUrl = (domain: string) =>
-  `https://img.logo.dev/${domain}?token=${process.env.NEXT_PUBLIC_LOGO_DEV_API_KEY}&size=64`;
+import { logoUrl } from "@/lib/logo";
 
 function RevealItem({
   label,

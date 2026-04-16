@@ -1,29 +1,25 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { useAptabase } from "@aptabase/react";
+import { useTrack } from "@/hooks/use-track";
 
+/**
+ * Fires a `page_view` event (through the typed `useTrack` wrapper, which
+ * handles the dev/prod split and sanitisation) on every pathname change.
+ */
 export function usePageTracking() {
   const pathname = usePathname();
-  const { trackEvent } = useAptabase();
-  const lastPathnameRef = useRef<string | null>(null);
+  const track = useTrack();
 
   useEffect(() => {
-    lastPathnameRef.current = pathname;
-
     const timeoutId = setTimeout(() => {
-      if (process.env.NODE_ENV === "development") {
-        console.log("[Aptabase - Dev] page_view", { pathname });
-        return;
-      }
-
-      trackEvent("page_view", {
-        page_title: document.title,
+      track("page_view", {
+        page_title: typeof document !== "undefined" ? document.title : "",
         page_path: pathname,
       });
     }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [pathname, trackEvent]);
+  }, [pathname, track]);
 }

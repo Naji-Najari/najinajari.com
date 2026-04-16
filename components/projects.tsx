@@ -5,9 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { MagicCard } from "@/components/ui/magic-card";
-
-const logoUrl = (domain: string) =>
-  `https://img.logo.dev/${domain}?token=${process.env.NEXT_PUBLIC_LOGO_DEV_API_KEY}&size=64`;
+import { logoUrl } from "@/lib/logo";
 
 const tagLogos: Record<string, string> = {
   LangGraph: "langchain.com",

@@ -9,19 +9,9 @@ import { BlogCover } from "@/components/blog-cover";
 import { GridBackground } from "@/components/grid-background";
 import { getAllSlugs, getPostBySlug } from "@/lib/blog";
 import { routing, type Locale } from "@/i18n/routing";
+import { formatDate } from "@/lib/format";
 
 type Params = { locale: Locale; slug: string };
-
-function formatDate(iso: string, locale: string) {
-  if (!iso) return "";
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(date);
-}
 
 export async function generateStaticParams() {
   const entries = await Promise.all(
@@ -121,7 +111,7 @@ export default async function BlogArticlePage({
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
                 <CalendarDays className="size-4" aria-hidden />
-                {formatDate(post.date, post.locale)}
+                {formatDate(post.date, post.locale, "long")}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Clock3 className="size-4" aria-hidden />

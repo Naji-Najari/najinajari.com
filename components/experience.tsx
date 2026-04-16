@@ -1,9 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { MapPin, Calendar } from "lucide-react";
 import { BlurFade } from "@/components/ui/blur-fade";
-
-const logoUrl = (domain: string) =>
-  `https://img.logo.dev/${domain}?token=${process.env.NEXT_PUBLIC_LOGO_DEV_API_KEY}&size=64`;
+import { logoUrl } from "@/lib/logo";
 
 const companyLogos: Record<string, string> = {
   Brevo: "brevo.com",

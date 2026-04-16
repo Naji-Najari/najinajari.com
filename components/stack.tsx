@@ -3,9 +3,7 @@ import { stackCategories } from "@/lib/data";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { MagicCard } from "@/components/ui/magic-card";
 import { Brain, Cpu, Code, Cloud, Languages } from "lucide-react";
-
-const logoUrl = (domain: string) =>
-  `https://img.logo.dev/${domain}?token=${process.env.NEXT_PUBLIC_LOGO_DEV_API_KEY}&size=64`;
+import { logoUrl } from "@/lib/logo";
 
 const toolLogos: Record<string, string> = {
   LangGraph: "langchain.com",
