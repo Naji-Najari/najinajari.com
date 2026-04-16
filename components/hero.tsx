@@ -11,6 +11,7 @@ import FramerWrapper from "@/components/animation/framer-wrapper";
 import { TextEffect } from "@/components/animation/text-effect";
 import TextRotator from "@/components/animation/text-rotator";
 import HackerBtn from "@/components/animation/hacker-btn";
+import { useTrack } from "@/hooks/use-track";
 
 const stackTags = [
   { name: "LangGraph", domain: "langchain.com" },
@@ -42,6 +43,9 @@ export default function Hero() {
   const t = useTranslations("hero");
   const locale = useLocale();
   const isArabic = locale === "ar";
+  const track = useTrack();
+  const trackLink = (platform: string) => () =>
+    track("external_link_click", { platform, location: "hero" });
 
   return (
     <section
@@ -107,23 +111,23 @@ export default function Hero() {
 
           {/* Actions — mobile only */}
           <div className="mt-8 flex flex-wrap gap-2 lg:hidden">
-            <a href="/CV_Naji_NAJARI.pdf" download className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
+            <a href="/CV_Naji_NAJARI.pdf" download onClick={trackLink("cv_download")} className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
               <Download className="size-4" />
               {t("download_cv")}
             </a>
-            <a href="mailto:najarinaji2015@gmail.com" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
+            <a href="mailto:najarinaji2015@gmail.com" onClick={trackLink("email")} className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
               <Mail className="size-4" />
               {t("email")}
             </a>
-            <a href="https://www.linkedin.com/in/naji-najari" target="_blank" rel="noopener noreferrer" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
+            <a href="https://www.linkedin.com/in/naji-najari" onClick={trackLink("linkedin")} target="_blank" rel="noopener noreferrer" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
               <img src={logoUrl("linkedin.com")} alt="LinkedIn" className="size-4 rounded-sm" />
               LinkedIn
             </a>
-            <a href="https://github.com/Naji-Najari" target="_blank" rel="noopener noreferrer" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
+            <a href="https://github.com/Naji-Najari" onClick={trackLink("github")} target="_blank" rel="noopener noreferrer" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
               <img src={logoUrl("github.com")} alt="GitHub" className="size-4 rounded-sm" />
               GitHub
             </a>
-            <a href="https://scholar.google.com/citations?user=rkgpg1gAAAAJ" target="_blank" rel="noopener noreferrer" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
+            <a href="https://scholar.google.com/citations?user=rkgpg1gAAAAJ" onClick={trackLink("google_scholar")} target="_blank" rel="noopener noreferrer" className="btn-3d inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150">
               <img src={logoUrl("scholar.google.com")} alt="Scholar" className="size-4 rounded-sm" />
               Scholar
             </a>
@@ -154,6 +158,7 @@ export default function Hero() {
           <a
             href="/CV_Naji_NAJARI.pdf"
             download
+            onClick={trackLink("cv_download")}
             className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
           >
             <Download className="size-4" />
@@ -163,6 +168,7 @@ export default function Hero() {
         <FramerWrapper delay={0.6} y={50}>
           <a
             href="mailto:najarinaji2015@gmail.com"
+            onClick={trackLink("email")}
             className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
           >
             <Mail className="size-4" />
@@ -172,6 +178,7 @@ export default function Hero() {
         <FramerWrapper delay={0.7} y={50}>
           <a
             href="https://www.linkedin.com/in/naji-najari"
+            onClick={trackLink("linkedin")}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
@@ -183,6 +190,7 @@ export default function Hero() {
         <FramerWrapper delay={0.8} y={50}>
           <a
             href="https://github.com/Naji-Najari"
+            onClick={trackLink("github")}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"
@@ -194,6 +202,7 @@ export default function Hero() {
         <FramerWrapper delay={0.9} y={50}>
           <a
             href="https://scholar.google.com/citations?user=rkgpg1gAAAAJ"
+            onClick={trackLink("google_scholar")}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-3d inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border-0 bg-[#FCFCFD] text-neutral-700 transition-all duration-150"

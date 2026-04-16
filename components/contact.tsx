@@ -7,6 +7,7 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { MagicCard } from "@/components/ui/magic-card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useTrack } from "@/hooks/use-track";
 
 const logoUrl = (domain: string) =>
   `https://img.logo.dev/${domain}?token=${process.env.NEXT_PUBLIC_LOGO_DEV_API_KEY}&size=64`;
@@ -17,21 +18,33 @@ function RevealItem({
   icon,
   domain,
   isLink,
+  platform,
 }: {
   label: string;
   value: string;
   icon?: React.ElementType;
   domain?: string;
   isLink?: boolean;
+  platform: string;
 }) {
   const [revealed, setRevealed] = useState(false);
   const [copied, setCopied] = useState(false);
   const Icon = icon;
+  const track = useTrack();
 
   return (
     <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden transition-colors hover:border-neutral-400 dark:hover:border-neutral-600">
       <button
-        onClick={() => setRevealed(!revealed)}
+        onClick={() => {
+          if (!revealed) {
+            track("external_link_click", {
+              platform,
+              location: "contact",
+              action: "reveal",
+            });
+          }
+          setRevealed(!revealed);
+        }}
         className="w-full flex items-center gap-3 text-sm font-medium px-4 py-3 text-foreground"
       >
         {domain ? (
@@ -48,6 +61,13 @@ function RevealItem({
               href={value}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() =>
+                track("external_link_click", {
+                  platform,
+                  location: "contact",
+                  action: "click_link",
+                })
+              }
               className="text-xs text-primary-sky hover:underline truncate"
             >
               {value}
@@ -58,6 +78,11 @@ function RevealItem({
           <button
             onClick={() => {
               navigator.clipboard.writeText(value);
+              track("external_link_click", {
+                platform,
+                location: "contact",
+                action: "copy",
+              });
               setCopied(true);
               setTimeout(() => setCopied(false), 2000);
             }}
@@ -76,13 +101,14 @@ function RevealItem({
 }
 
 const contactItems = [
-  { label: "Email", value: "najarinaji2015@gmail.com", domain: "", icon: Mail, isLink: false },
-  { label: "Phone", value: "(+33) 6 98 28 43 44", domain: "", icon: Phone, isLink: false },
-  { label: "LinkedIn", value: "https://www.linkedin.com/in/naji-najari", domain: "linkedin.com", icon: null, isLink: true },
+  { label: "Email", value: "najarinaji2015@gmail.com", domain: "", icon: Mail, isLink: false, platform: "email" },
+  { label: "Phone", value: "(+33) 6 98 28 43 44", domain: "", icon: Phone, isLink: false, platform: "phone" },
+  { label: "LinkedIn", value: "https://www.linkedin.com/in/naji-najari", domain: "linkedin.com", icon: null, isLink: true, platform: "linkedin" },
 ];
 
 export default function Contact() {
   const t = useTranslations("contact");
+  const track = useTrack();
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
@@ -98,9 +124,11 @@ export default function Contact() {
       });
 
       if (!res.ok) throw new Error();
+      track("contact_submit", { status: "success", subject_length: form.subject.length });
       setStatus("sent");
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch {
+      track("contact_submit", { status: "error" });
       setStatus("error");
     }
   };
@@ -131,6 +159,7 @@ export default function Contact() {
                   icon={item.icon || undefined}
                   domain={item.domain || undefined}
                   isLink={item.isLink}
+                  platform={item.platform}
                 />
               ))}
             </div>

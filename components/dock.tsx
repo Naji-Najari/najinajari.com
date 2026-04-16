@@ -26,6 +26,7 @@ import { useTheme } from "@/components/theme-provider";
 import { navItems } from "@/lib/data";
 import { useLocale, useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { useTrack } from "@/hooks/use-track";
 
 const iconMap: Record<string, React.ElementType> = {
   Home,
@@ -100,10 +101,17 @@ function DockItem({
 function ThemeToggle({ mouseX }: { mouseX: MotionValue<number> }) {
   const ref = useRef<HTMLButtonElement>(null);
   const { theme, setTheme } = useTheme();
+  const track = useTrack();
   const [mounted, setMounted] = useState(false);
   const [hovered, setHovered] = useState(false);
 
   useEffect(() => setMounted(true), []);
+
+  const handleToggle = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    track("theme_toggle", { to: next });
+    setTheme(next);
+  };
 
   const distance = useTransform(mouseX, (val: number) => {
     const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
@@ -121,7 +129,7 @@ function ThemeToggle({ mouseX }: { mouseX: MotionValue<number> }) {
     <motion.button
       ref={ref}
       style={{ width, height: width }}
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={handleToggle}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className="relative flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground transition-colors"
@@ -206,8 +214,10 @@ export default function Dock() {
   const defaultSection = isBlogRoute ? "blog" : "home";
   const activeSection = useActiveSection(isHome, defaultSection);
   const t = useTranslations("nav");
+  const track = useTrack();
 
   const handleNav = (id: string) => {
+    track("dock_click", { section: id, from_home: isHome });
     if (isHome) {
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
       return;

@@ -8,6 +8,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTrack } from "@/hooks/use-track";
 
 interface Message {
   role: "user" | "assistant";
@@ -60,6 +61,7 @@ function getOrCreateSessionId(): string {
 export default function Chatbot() {
   const t = useTranslations("chatbot");
   const locale = useLocale();
+  const track = useTrack();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -101,6 +103,12 @@ export default function Chatbot() {
 
   const sendMessage = async (content: string) => {
     if (!content.trim() || isStreaming) return;
+
+    track("chatbot_message_sent", {
+      length: content.trim().length,
+      turn_number: messages.length / 2 + 1,
+      locale,
+    });
 
     const userMessage: Message = { role: "user", content: content.trim() };
     const newMessages = [...messages, userMessage];
@@ -195,7 +203,10 @@ export default function Chatbot() {
     <>
       {/* Floating Button - exact FeedLake style */}
       <Button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          if (!isOpen) track("chatbot_open", { locale });
+          setIsOpen(!isOpen);
+        }}
         size="lg"
         className={cn(
           "fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50",

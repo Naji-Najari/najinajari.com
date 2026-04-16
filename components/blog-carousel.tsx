@@ -85,7 +85,7 @@ export function BlogCarousel({
             key={`${post.locale}-${post.slug}`}
             className="snap-start shrink-0 w-[85%] md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)]"
           >
-            <BlogCard post={post} readMoreLabel={readMoreLabel} />
+            <BlogCard post={post} readMoreLabel={readMoreLabel} source="carousel" />
           </div>
         ))}
       </div>

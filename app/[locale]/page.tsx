@@ -10,6 +10,7 @@ import Contact from "@/components/contact";
 import Footer from "@/components/footer";
 import Chatbot from "@/components/chatbot";
 import { GridBackground } from "@/components/grid-background";
+import { SectionTracker } from "@/components/analytics/section-tracker";
 
 export default function Home() {
   return (
@@ -17,6 +18,7 @@ export default function Home() {
       <GridBackground />
 
       <Dock />
+      <SectionTracker />
       <main className="relative">
         <Hero />
         <About />

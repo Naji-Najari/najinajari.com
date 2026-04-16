@@ -1,12 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowUpRight, CalendarDays, Clock3 } from "lucide-react";
 import { MagicCard } from "@/components/ui/magic-card";
 import { BlogCover } from "@/components/blog-cover";
+import { useTrack } from "@/hooks/use-track";
 import type { PostMeta } from "@/lib/blog";
 
 interface BlogCardProps {
   post: PostMeta;
   readMoreLabel: string;
+  source: "carousel" | "listing";
 }
 
 function formatDate(iso: string, locale: string) {
@@ -20,10 +24,18 @@ function formatDate(iso: string, locale: string) {
   }).format(date);
 }
 
-export function BlogCard({ post, readMoreLabel }: BlogCardProps) {
+export function BlogCard({ post, readMoreLabel, source }: BlogCardProps) {
+  const track = useTrack();
   return (
     <Link
       href={`/${post.locale}/blog/${post.slug}`}
+      onClick={() =>
+        track("blog_card_click", {
+          slug: post.slug,
+          source,
+          locale: post.locale,
+        })
+      }
       className="group block h-full focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-xl"
       aria-label={post.title}
     >

@@ -91,7 +91,7 @@ export default async function BlogIndexPage({
                   inView
                   className="h-full"
                 >
-                  <BlogCard post={post} readMoreLabel={t("read_more")} />
+                  <BlogCard post={post} readMoreLabel={t("read_more")} source="listing" />
                 </BlurFade>
               ))}
             </div>
