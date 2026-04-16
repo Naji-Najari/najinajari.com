@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider, themeInitScript } from "@/components/theme-provider";
 import { AptabaseClient } from "@/components/analytics/aptabase-client";
 import { PostHogProvider, PostHogPageView } from "@/components/analytics/posthog-provider";
 import { Suspense } from "react";
@@ -93,14 +93,18 @@ export default async function LocaleLayout({
   const dir = locale === "ar" ? "rtl" : "ltr";
 
   return (
-    <html lang={locale} dir={dir} className="font-sans" suppressHydrationWarning>
+    <html
+      lang={locale}
+      dir={dir}
+      className="font-sans"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-screen antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider defaultTheme="light">
           <PostHogProvider>
             <Suspense fallback={null}>
               <PostHogPageView />

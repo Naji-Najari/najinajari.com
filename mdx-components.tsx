@@ -1,17 +1,10 @@
 import type { MDXComponents } from "mdx/types";
-import Image, { type ImageProps } from "next/image";
 import Link from "next/link";
+import { MdxImage } from "@/components/mdx-image";
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
-    img: (props) => (
-      <Image
-        sizes="100vw"
-        className="rounded-xl"
-        style={{ width: "100%", height: "auto" }}
-        {...(props as ImageProps)}
-      />
-    ),
+    img: (props) => <MdxImage src={props.src} alt={props.alt} />,
     a: ({ href, children, ...rest }) => {
       if (typeof href === "string" && href.startsWith("/")) {
         return (
