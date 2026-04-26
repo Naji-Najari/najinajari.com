@@ -61,12 +61,144 @@
   },
   "projects": {
     "title": "المشاريع",
-    "visit_site": "زيارة الموقع",
-    "coming_soon": "قريباً",
-    "ragmaker_title": "RagMaker — منصة RAG وكيلية",
-    "ragmaker_desc": "شاركت في تطوير منصة SaaS B2B وكيلية تمكّن المستخدمين من الاستعلام عن مستندات متعددة الصيغ وربط أدوات خارجية عبر الذكاء الاصطناعي التحادثي. بحث هجين (دلالي + كلمات مفتاحية)، Text-to-SQL، تكامل MCP، سير عمل وكيلية LangGraph.",
-    "multiagent_title": "multi-agent-llm-stack",
-    "multiagent_desc": "حزمة ML إنتاجية شاملة: RAG متعدد الوكلاء مع LangGraph، ضبط LLM (LoRA/QLoRA)، خدمة vLLM، Docker، Kubernetes، مراقبة Prometheus. حزمة كاملة، مفتوحة المصدر."
+    "read_more": "اقرأ المزيد",
+    "try_it": "جرّب",
+    "source_code": "الكود المصدري",
+    "career_copilot_title": "Career Copilot · محلّل متعدد الوكلاء للسيرة الذاتية × الوظيفة",
+    "career_copilot_desc": "تطبيق متعدد الوكلاء على Google ADK v2: يحلل السيرة الذاتية ووصف الوظيفة بالتوازي، ثم يوجّه إلى مسار المُجنِّد (حكم الملاءمة + رسالة LinkedIn تستشهد بإنجاز حقيقي من السيرة الذاتية) أو مسار المرشح (بحث مباشر عن الشركة عبر Tavily MCP + تحضير مخصص للمقابلة). مخرجات مكتوبة بـ Pydantic، وتتبّع عبر Langfuse."
+  },
+  "career_copilot_page": {
+    "meta_title": "Career Copilot · ذكاء اصطناعي للمُجنِّدين والمرشحين | ناجي نجاري",
+    "meta_description": "يقرأ Career Copilot أي سيرة ذاتية مقابل أي وصف وظيفة في ثوانٍ. يحصل المُجنِّدون على حكم ملاءمة ورسالة LinkedIn جاهزة للإرسال تستشهد بإنجازات حقيقية من السيرة الذاتية. ويحصل المرشحون على بحث مباشر عن الشركة وتحضير مقابلة مخصص. تجربة مجانية.",
+    "back_to_projects": "العودة إلى المشاريع",
+    "title": "Career Copilot",
+    "tagline": "ألصق سيرة ذاتية ووصف وظيفة. يحصل المُجنِّدون على حكم ملاءمة ورسالة تواصل تستحق الإرسال. يحصل المرشحون على ملف عن الشركة وتحضير مقابلة مخصص.",
+    "problem_kicker": "المشكلة",
+    "solution_kicker": "الحل",
+    "arch_kicker": "المعمارية",
+    "agents_kicker": "الوكلاء",
+    "api_kicker": "API",
+    "scale_kicker": "الهندسة",
+    "obs_kicker": "القابلية للمراقبة",
+    "frontend_kicker": "الواجهة الأمامية",
+    "stack_kicker": "Stack",
+    "problem_title": "رسائل التواصل المنسوخة وتحضير المقابلة العام يضيعان وقت الجميع.",
+    "problem_bullets": [
+      "يغرق المُجنِّدون في رسائل قوالب تتجاهل نصف السيرة الذاتية التي استلموها للتو.",
+      "يدخل المرشحون المقابلات دون معرفة شيء عن الشركة التي تقدّموا إليها.",
+      "يردّ Career Copilot على الطرفين في أداة واحدة: أدلة حقيقية، أسئلة حقيقية، في ثوانٍ."
+    ],
+    "modes_title": "وضعان، أداة واحدة",
+    "modes_intro": "اختر من أنت. نفس السيرة الذاتية والوظيفة تقود إلى إجابات مختلفة جداً.",
+    "recruiter_title": "وضع المُجنِّد",
+    "recruiter_desc": "اعرف في ثوانٍ ما إذا كان المرشح يناسب الدور. إذا ناسب، احصل على رسالة LinkedIn لا تبدو كقالب.",
+    "recruiter_bullets": [
+      "حكم ملاءمة واضح (fit أو borderline أو no fit) مع ثقة وأدلة مطابقة من السيرة الذاتية",
+      "مسوّدة رسالة LinkedIn تستشهد بإنجاز حقيقي من سيرة المرشح الذاتية",
+      "عند عدم الملاءمة: شرح واضح للفجوات وأدوار مماثلة جديرة بالمتابعة"
+    ],
+    "candidate_title": "وضع المرشح",
+    "candidate_desc": "ادخل المقابلة وأنت تعرف الشركة وما الذي سيُطلب منك.",
+    "candidate_bullets": [
+      "بحث مباشر عن الشركة: التمويل، الثقافة، إشارات Glassdoor، الأخبار الحديثة",
+      "اقتراحات تحسين مستهدفة للسيرة الذاتية مطابقة للوظيفة، دون اختلاق خبرة",
+      "تحضير مقابلة مخصص للدور: أسئلة محتملة، نقاط حوار، أسئلة ذكية للرد"
+    ],
+    "architecture_title": "معمارية النظام",
+    "architecture_intro": "ثلاث طبقات. واجهة Next.js 15 / React 19 تتعامل مع الرفع واختيار الوضع وعرض النتائج المباشرة. خادم FastAPI يعرض اثنين من الـ endpoints بدون state وينسّق workflow رسم بياني على Google ADK v2. يشغّل الرسم البياني ثمانية وكلاء LLM على OpenAI gpt-5.4-mini عبر LiteLlm، مع فروع متوازية تُزامَن بواسطة JoinNodes وأدوات خارجية تُستدعى عبر MCP.",
+    "tier_frontend_title": "الواجهة الأمامية",
+    "tier_frontend_desc": "Next.js 15 (App Router، RSC)، React 19، TanStack Query لإدارة state الطلبات، Zod للتحقق من جانب العميل، primitives Radix UI، Tailwind v4.",
+    "tier_backend_title": "الخادم الخلفي",
+    "tier_backend_desc": "FastAPI مع endpoints بدون state، I/O async من البداية للنهاية، middleware logging مهيكل، عقود أخطاء مكتوبة (502 / 500 / 415 / 413 / 422).",
+    "tier_orchestration_title": "تنسيق LLM",
+    "tier_orchestration_desc": "رسم بياني Workflow على Google ADK v2: parsers بالتوازي، JoinNodes للمزامنة، routers من نوع FunctionNode، sub-agents بمخرجات Pydantic مكتوبة، MCP toolset لـ Tavily.",
+    "architecture_graph_alt": "الرسم البياني متعدد الوكلاء لـ Career Copilot",
+    "architecture_legend": "أزرق: وكلاء LLM · أخضر: نودات Python نقية (routers، join) · برتقالي (متقطع): أدوات خارجية عبر MCP · رمادي: I/O HTTP.",
+    "graph_title": "رسم بياني الوكلاء",
+    "graph_intro": "كل التنسيق مُعلَن في تعريف Workflow واحد. تصف الـ edges الطبولوجيا: الفروع المتوازية تستخدم tuples، الـ routers تربط مخرجات رمزية بالنودات التالية، الـ JoinNodes تُزامن fan-in. الحتمية تأتي من state مكتوب يمر بين النودات؛ لا شيء يعتمد على parsing strings.",
+    "agents_title": "الوكلاء",
+    "agents_intro": "ثمانية وكلاء LLM، اثنان من routers من نوع FunctionNode، اثنان من JoinNodes. كل وكيل يعمل على OpenAI gpt-5.4-mini عبر LiteLlm بمستوى reasoning منخفض افتراضياً. يرفع Outreach Writer إلى medium للحصول على رسائل أدق وأقل عمومية. مخرجات كل وكيل هي schema Pydantic يطبّقه output_schema في ADK، باستثناء Research Agent الذي يستخدم أدوات Tavily ويتحقق من JSON عند حدود الـ API.",
+    "agent_role_parser": "محلّل",
+    "agent_role_recruiter": "مُجنِّد",
+    "agent_role_candidate": "مرشح",
+    "agent_cv_parser_desc": "يستخرج المهارات وسنوات الخبرة والإنجازات واللغات في ParsedCV مكتوب.",
+    "agent_jd_parser_desc": "يستخرج المسمى والشركة والمهارات المطلوبة والمفضلة والمستوى وإشارات الوكالة في ParsedJD.",
+    "agent_fit_analyzer_desc": "يقارن ParsedCV بـ ParsedJD ويُصدر FitVerdict مع ثقة مُعايَرة وأدلة مطابقة وفجوات.",
+    "agent_outreach_writer_desc": "يكتب رسالة LinkedIn تستشهد بإنجاز محدد من السيرة الذاتية. مستوى reasoning متوسط.",
+    "agent_gap_explainer_desc": "في حال no_fit، يشرح الفجوات بلغة واضحة ويقترح أدواراً مماثلة جديرة بالمتابعة.",
+    "agent_research_desc": "يستدعي Tavily search و extract عبر MCP لجمع معلومات الشركة: التمويل، الثقافة، Glassdoor.",
+    "agent_cv_optimizer_desc": "يقترح تعديلات مستهدفة على السيرة الذاتية لتطابق الوظيفة بشكل أفضل، دون الكذب بشأن خبرة المرشح.",
+    "agent_interview_prep_desc": "يبني حزمة تحضير مقابلة: أسئلة محتملة، نقاط حوار، أسئلة ذكية للرد.",
+    "api_title": "واجهة الـ API",
+    "api_intro": "اثنان من الـ endpoints بدون state، كلاهما POST. كل شكل استجابة هو نموذج Pydantic. يحصل العملاء على schema OpenAPI صارم، وتولّد FastAPI الوثائق تلقائياً على /docs.",
+    "api_analyze_title": "POST /v1/analyze",
+    "api_analyze_desc": "يشغّل الرسم البياني الكامل على زوج CV + JD ويُرجع استجابة مكتوبة مميَّزة حسب الوضع. الأخطاء تنتشر كـ HTTPExceptions مهيكلة برسائل قابلة للتنفيذ.",
+    "api_pdf_title": "POST /v1/extract-pdf",
+    "api_pdf_desc": "يرفع PDF، يتحقق من content-type والحجم، يُرجع نص الصفحات مدمجاً. يرفض ملفات PDF الممسوحة ضوئياً التي لا تحتوي على نص قابل للاستخراج.",
+    "scale_title": "هندسة قابلة للتوسع",
+    "scale_intro": "مبنية للتوسع أفقياً على منصات serverless (Cloud Run، HF Spaces) دون اقتران state بين الطلبات. كل قرار تصميمي يفضّل تكلفة وزمن استجابة قابلَين للتنبؤ على اتساع الميزات.",
+    "scale_bullets": [
+      {
+        "title": "Workers بدون state",
+        "desc": "لا session في الذاكرة، لا cache لكل instance. كل طلب يحمل state الخاص به. يوضع خلف أي load balancer أو autoscaler ببساطة."
+      },
+      {
+        "title": "Async من البداية للنهاية",
+        "desc": "FastAPI + httpx + ADK runner async. parsing CV/JD المتوازي يقسم زمن الاستجابة المرتبط بـ LLM إلى النصف."
+      },
+      {
+        "title": "Reasoning مدرك للتكلفة",
+        "desc": "مستوى reasoning منخفض افتراضياً على gpt-5.4-mini. فقط Outreach Writer يرفع إلى medium حيث تصنع جودة الرسالة فرقاً."
+      },
+      {
+        "title": "عقود مكتوبة في كل مكان",
+        "desc": "Schemas Pydantic عند كل حدود node وعند حافة الـ API. مخرجات LLM غير صالحة تفشل بسرعة وبصوت عالٍ، لا بصمت مع state تالف في المراحل التالية."
+      },
+      {
+        "title": "تحقق صارم من المُدخلات",
+        "desc": "endpoint الـ PDF يفرض content-type وحد أقصى 10 MB. ملفات PDF الفارغة أو الممسوحة فقط تُرجع 422 برسالة قابلة للتنفيذ بدلاً من 500 عام."
+      },
+      {
+        "title": "جاهز للحاويات",
+        "desc": "Dockerfile + lockfile uv. يُنشر على Cloud Run أو Fly.io أو HF Spaces. تكوين عبر متغيرات البيئة، لا أسرار مشفرة، لا scripts تهيئة."
+      }
+    ],
+    "obs_title": "القابلية للمراقبة",
+    "obs_intro": "كل طلب قابل للمراقبة من البداية للنهاية عبر Langfuse. الـ traces مُعلَّمة بالوضع والنموذج والإصدار لرصد الانحدارات بسهولة.",
+    "obs_bullets": [
+      {
+        "title": "Spans Langfuse لكل طلب",
+        "desc": "كل استدعاء /v1/analyze يفتح observation أبوي. استدعاءات sub-agents و tool calls تتداخل تحته. مُدخَلات ومخرجات وعدد tokens مُلتقطة."
+      },
+      {
+        "title": "نشر التتبّع",
+        "desc": "propagate_attributes يحقن الوضع والنموذج والإصدار و cv_chars و jd_chars في الـ trace النشط. فلاتر سريعة في واجهة Langfuse."
+      },
+      {
+        "title": "Logging مهيكل",
+        "desc": "middleware مخصص يسجّل شكل الطلب والوضع و state keys للمخرجات. الإخفاقات ترتفع بـ traceback كامل إلى agent runner قبل أن تُعاد كـ HTTPExceptions."
+      }
+    ],
+    "frontend_title": "الواجهة الأمامية",
+    "frontend_intro": "Next.js 15 مع App Router. React 19 مع use() الجديد ومفاهيم Server Components. Tailwind v4 + primitives Radix في مكتبة مكونات بأسلوب shadcn.",
+    "frontend_bullets": [
+      {
+        "title": "TanStack Query لـ UX async",
+        "desc": "Mutations لـ /analyze، UX لرفع الملفات مع mutation state. Toasts من Sonner تُظهر أخطاء الخادم بالرسائل المهيكلة 502 / 422."
+      },
+      {
+        "title": "Forms مُتحقَّق منها بـ Zod",
+        "desc": "يتشارك الوضعان نفس schema الـ form. التحقق من جانب العميل يمنع معظم رحلات الذهاب والإياب 4xx قبل أن تصل إلى الشبكة."
+      },
+      {
+        "title": "رفع PDF + لصق",
+        "desc": "وضعان للإدخال لكل جانب (CV / JD): لصق نص أو رفع PDF. الرفع يُرسل إلى /v1/extract-pdf، والاستجابة تُغذّي نفس استدعاء /analyze."
+      }
+    ],
+    "stack_title": "Stack",
+    "stack_intro": "Python و TypeScript حديثَين في كل مكان. كل خيار سأعيد اتخاذه على مشروع جديد من الصفر.",
+    "cta_title": "جرّبه على سيرتك الذاتية ووظيفتك",
+    "cta_desc": "ألصق سيرة ذاتية، ألصق وصف وظيفة، اختر وضعاً. ستحصل على حكم ومسوّدة في ثوانٍ."
   },
   "publications": {
     "title": "المنشورات والبراءات",

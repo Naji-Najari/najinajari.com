@@ -28,6 +28,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
+  const projectEntries: MetadataRoute.Sitemap = routing.locales.map(
+    (locale) => ({
+      url: urlFor(locale, "/projects/career-copilot"),
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    }),
+  );
+
   const postEntries: MetadataRoute.Sitemap = (
     await Promise.all(
       routing.locales.map(async (locale) => {
@@ -42,5 +51,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     )
   ).flat();
 
-  return [...homeEntries, ...blogIndexEntries, ...postEntries];
+  return [
+    ...homeEntries,
+    ...blogIndexEntries,
+    ...projectEntries,
+    ...postEntries,
+  ];
 }

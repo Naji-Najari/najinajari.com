@@ -95,8 +95,7 @@ Cloud/MLOps: GCP/Vertex AI, AWS, Palantir, ZenML, MLFlow, Spark/PySpark
 Languages: French (Fluent), English (Fluent), Arabic (Native)
 
 PROJECTS:
-1. RagMaker (ragmaker.ai): Co-developed an Agentic B2B SaaS platform for document Q&A with hybrid search, Text-to-SQL, MCP integration, LangGraph workflows.
-2. multi-agent-llm-stack (Coming Soon): End-to-end production ML stack with multi-agent RAG, LLM fine-tuning, vLLM serving.
+1. Career Copilot (career-copilot.najinajari.com, github.com/Naji-Najari/career-copilot): Multi-agent CV × JD analyzer on Google ADK v2. Recruiter mode → fit verdict + LinkedIn outreach citing a CV achievement. Candidate mode → live company research via Tavily MCP + interview prep. Stack: Google ADK v2, OpenAI gpt-5.4-mini, FastAPI, Pydantic, Langfuse, MCP.
 `;
 
 interface ChatMessage {

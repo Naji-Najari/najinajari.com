@@ -61,12 +61,144 @@
   },
   "projects": {
     "title": "Projets",
-    "visit_site": "Voir le site",
-    "coming_soon": "Bientôt",
-    "ragmaker_title": "RagMaker — Plateforme RAG Agentique",
-    "ragmaker_desc": "Co-développé une plateforme SaaS B2B agentique permettant aux utilisateurs d'interroger des documents multi-formats et de connecter des outils externes via l'IA conversationnelle. Recherche hybride (sémantique + mots-clés), Text-to-SQL, intégration MCP, workflows agentiques LangGraph.",
-    "multiagent_title": "multi-agent-llm-stack",
-    "multiagent_desc": "Stack ML de production de bout en bout : RAG multi-agents avec LangGraph, fine-tuning LLM (LoRA/QLoRA), serving vLLM, Docker, Kubernetes, monitoring Prometheus. Stack complet, open source."
+    "read_more": "En savoir plus",
+    "try_it": "Essayer",
+    "source_code": "Code source",
+    "career_copilot_title": "Career Copilot · Analyseur multi-agents CV × Offre",
+    "career_copilot_desc": "Application multi-agents sur Google ADK v2 : parse un CV et une offre en parallèle, puis route vers un flux recruteur (verdict de fit + message LinkedIn citant une réalisation concrète du CV) ou un flux candidat (recherche live de l'entreprise via Tavily MCP + préparation d'entretien sur mesure). Sorties typées Pydantic, traçabilité Langfuse."
+  },
+  "career_copilot_page": {
+    "meta_title": "Career Copilot · IA pour recruteurs et candidats | Naji Najari",
+    "meta_description": "Career Copilot lit n'importe quel CV face à n'importe quelle offre en quelques secondes. Les recruteurs obtiennent un verdict de fit et un message LinkedIn prêt à envoyer citant des réalisations concrètes du CV. Les candidats obtiennent une recherche live sur l'entreprise et une préparation d'entretien sur mesure. Démo gratuite.",
+    "back_to_projects": "Retour aux projets",
+    "title": "Career Copilot",
+    "tagline": "Colle un CV et une offre. Les recruteurs obtiennent un verdict de fit et un outreach qui vaut le coup d'être envoyé. Les candidats obtiennent un brief sur l'entreprise et une préparation d'entretien sur mesure.",
+    "problem_kicker": "Problème",
+    "solution_kicker": "Solution",
+    "arch_kicker": "Architecture",
+    "agents_kicker": "Agents",
+    "api_kicker": "API",
+    "scale_kicker": "Ingénierie",
+    "obs_kicker": "Observabilité",
+    "frontend_kicker": "Frontend",
+    "stack_kicker": "Stack",
+    "problem_title": "Les messages d'outreach copiés-collés et la prépa d'entretien générique font perdre du temps à tout le monde.",
+    "problem_bullets": [
+      "Les recruteurs croulent sous des messages templates qui ignorent la moitié du CV qu'ils viennent de recevoir.",
+      "Les candidats arrivent en entretien sans rien savoir de la boîte chez laquelle ils ont postulé.",
+      "Career Copilot répond aux deux côtés dans un seul outil : preuves concrètes, vraies questions, en quelques secondes."
+    ],
+    "modes_title": "Deux modes, un seul outil",
+    "modes_intro": "Choisis qui tu es. Le même CV et la même offre mènent à des réponses très différentes.",
+    "recruiter_title": "Mode recruteur",
+    "recruiter_desc": "Sache en quelques secondes si le candidat colle au poste. S'il colle, obtiens un message LinkedIn qui ne ressemble pas à un template.",
+    "recruiter_bullets": [
+      "Un verdict de fit clair (fit, borderline ou no fit) avec confiance et preuves issues du CV",
+      "Un message LinkedIn qui cite une réalisation concrète du CV du candidat",
+      "Si le fit n'est pas là : explication claire des gaps et postes adjacents pertinents"
+    ],
+    "candidate_title": "Mode candidat",
+    "candidate_desc": "Arrive en entretien en connaissant déjà l'entreprise et ce qu'on va te demander.",
+    "candidate_bullets": [
+      "Recherche live sur l'entreprise : levée, culture, signaux Glassdoor, actus récentes",
+      "Suggestions ciblées d'amélioration du CV alignées sur l'offre, sans inventer d'expérience",
+      "Préparation d'entretien sur mesure : questions probables, talking points, questions à poser en retour"
+    ],
+    "architecture_title": "Architecture système",
+    "architecture_intro": "Trois tiers. Un frontend Next.js 15 / React 19 gère les uploads, la sélection de mode et l'affichage live. Un backend FastAPI expose deux endpoints stateless et orchestre un workflow graphe sur Google ADK v2. Le graphe fait tourner huit agents LLM sur OpenAI gpt-5.4-mini via LiteLlm, avec des branches parallèles synchronisées par des JoinNodes et des outils externes accessibles via MCP.",
+    "tier_frontend_title": "Frontend",
+    "tier_frontend_desc": "Next.js 15 (App Router, RSC), React 19, TanStack Query pour le state des requêtes, Zod pour la validation côté client, primitives Radix UI, Tailwind v4.",
+    "tier_backend_title": "Backend",
+    "tier_backend_desc": "FastAPI avec deux endpoints stateless, I/O async de bout en bout, middleware de logging structuré, contrats d'erreur typés (502 / 500 / 415 / 413 / 422).",
+    "tier_orchestration_title": "Orchestration LLM",
+    "tier_orchestration_desc": "Graphe Workflow Google ADK v2 : parsers en parallèle, JoinNodes pour la synchro fan-in, routers FunctionNode, sub-agents avec sorties Pydantic typées, MCP toolset pour Tavily.",
+    "architecture_graph_alt": "Graphe multi-agents Career Copilot",
+    "architecture_legend": "Bleu : agents LLM · Vert : nœuds Python purs (routers, join) · Orange (pointillé) : outils externes via MCP · Gris : I/O HTTP.",
+    "graph_title": "Le graphe d'agents",
+    "graph_intro": "Toute l'orchestration est déclarée dans une seule définition Workflow. Les edges décrivent la topologie : les branches parallèles utilisent des tuples, les routers mappent des sorties symboliques aux nodes suivants, les JoinNodes synchronisent le fan-in. Le déterminisme vient du state typé qui passe entre les nodes ; rien ne dépend du parsing de strings.",
+    "agents_title": "Les agents",
+    "agents_intro": "Huit agents LLM, deux routers FunctionNode, deux JoinNodes. Chaque agent tourne sur OpenAI gpt-5.4-mini via LiteLlm avec un reasoning effort low par défaut. L'Outreach Writer monte à medium pour générer des messages plus précis. La sortie de chaque agent est un schema Pydantic appliqué par output_schema d'ADK, sauf le Research Agent qui utilise les outils Tavily et valide son JSON à la frontière API.",
+    "agent_role_parser": "Parser",
+    "agent_role_recruiter": "Recruteur",
+    "agent_role_candidate": "Candidat",
+    "agent_cv_parser_desc": "Extrait les compétences, années d'expérience, réalisations et langues dans un ParsedCV typé.",
+    "agent_jd_parser_desc": "Extrait le titre, l'entreprise, les compétences requises et préférées, la séniorité et les indices d'agence dans un ParsedJD.",
+    "agent_fit_analyzer_desc": "Compare ParsedCV à ParsedJD et émet un FitVerdict avec confiance calibrée, strengths matchées et gaps.",
+    "agent_outreach_writer_desc": "Écrit un message LinkedIn qui cite une réalisation concrète du CV. Reasoning effort medium.",
+    "agent_gap_explainer_desc": "En cas de no_fit, explique les gaps en clair et suggère des postes adjacents pertinents.",
+    "agent_research_desc": "Appelle Tavily search et extract via MCP pour récolter de l'intelligence sur l'entreprise : levée, culture, Glassdoor.",
+    "agent_cv_optimizer_desc": "Suggère des améliorations ciblées du CV pour mieux matcher l'offre, sans mentir sur l'expérience du candidat.",
+    "agent_interview_prep_desc": "Construit un pack de préparation d'entretien : questions probables, talking points, questions à poser en retour.",
+    "api_title": "Surface API",
+    "api_intro": "Deux endpoints stateless, tous les deux POST. Chaque shape de réponse est un modèle Pydantic. Les clients ont un schema OpenAPI strict et FastAPI auto-génère les docs sur /docs.",
+    "api_analyze_title": "POST /v1/analyze",
+    "api_analyze_desc": "Lance le graphe complet sur une paire CV + offre et retourne une réponse typée discriminée par mode. Les erreurs propagent comme HTTPExceptions structurées avec messages actionnables.",
+    "api_pdf_title": "POST /v1/extract-pdf",
+    "api_pdf_desc": "Upload un PDF, valide content-type et taille, retourne le texte concaténé des pages. Rejette les PDFs scannés sans texte extractible.",
+    "scale_title": "Engineering scalable",
+    "scale_intro": "Conçu pour scaler horizontalement sur des plateformes serverless (Cloud Run, HF Spaces) sans couplage de state entre requêtes. Chaque décision favorise un coût et une latence prédictibles.",
+    "scale_bullets": [
+      {
+        "title": "Workers stateless",
+        "desc": "Pas de session en mémoire, pas de cache par instance. Chaque requête porte son propre state. Se met derrière n'importe quel load balancer ou autoscaler trivialement."
+      },
+      {
+        "title": "Async de bout en bout",
+        "desc": "FastAPI + httpx + ADK runner async. Le parsing CV/JD en parallèle divise par deux la latence tail bound LLM sur chaque requête."
+      },
+      {
+        "title": "Reasoning cost-aware",
+        "desc": "Reasoning effort low par défaut sur gpt-5.4-mini. Seul l'Outreach Writer monte à medium là où la qualité du message fait la différence."
+      },
+      {
+        "title": "Contrats typés partout",
+        "desc": "Schemas Pydantic à chaque frontière de node et au niveau API. Une sortie LLM invalide fail fast et bruyamment, pas en silence avec un state corrompu en aval."
+      },
+      {
+        "title": "Validation stricte des inputs",
+        "desc": "L'endpoint PDF impose un content-type et un cap de 10 MB. Les PDFs vides ou scannés retournent 422 avec un message actionnable au lieu d'un 500 générique."
+      },
+      {
+        "title": "Container-ready",
+        "desc": "Dockerfile + lockfile uv. Déploie sur Cloud Run, Fly.io ou HF Spaces. Config par variables d'environnement, pas de secrets hardcodés, pas de scripts d'init."
+      }
+    ],
+    "obs_title": "Observabilité",
+    "obs_intro": "Chaque requête est observable de bout en bout via Langfuse. Les traces sont taggées par mode, modèle et version pour repérer facilement les régressions.",
+    "obs_bullets": [
+      {
+        "title": "Spans Langfuse par requête",
+        "desc": "Chaque appel /v1/analyze ouvre une observation parente. Les appels sub-agents et tool calls s'imbriquent dessous. Inputs, outputs et token counts capturés."
+      },
+      {
+        "title": "Propagation de trace",
+        "desc": "propagate_attributes injecte mode, modèle, version, cv_chars et jd_chars dans la trace active. Filtres rapides dans l'UI Langfuse."
+      },
+      {
+        "title": "Logging structuré",
+        "desc": "Middleware custom qui log la shape de la requête, le mode et les state keys de sortie. Les failures remontent avec full traceback à l'agent runner avant d'être remappées en HTTPExceptions."
+      }
+    ],
+    "frontend_title": "Frontend",
+    "frontend_intro": "Next.js 15 avec App Router. React 19 avec les nouveaux use() et Server Components. Tailwind v4 + primitives Radix dans une lib de composants façon shadcn.",
+    "frontend_bullets": [
+      {
+        "title": "TanStack Query pour l'UX async",
+        "desc": "Mutations sur /analyze, UX d'upload de fichiers avec mutation state. Toasts Sonner qui surfacent les erreurs backend avec les messages 502 / 422 structurés."
+      },
+      {
+        "title": "Forms validés par Zod",
+        "desc": "Les deux modes partagent un seul schema. La validation côté client évite la plupart des round-trips 4xx avant qu'ils n'atteignent le réseau."
+      },
+      {
+        "title": "Upload PDF + paste",
+        "desc": "Deux modes d'input par côté (CV / offre) : coller du texte ou uploader un PDF. L'upload poste vers /v1/extract-pdf, la réponse alimente le même appel /analyze."
+      }
+    ],
+    "stack_title": "Stack",
+    "stack_intro": "Python et TypeScript modernes partout. Chaque choix est un que je referais sur un nouveau projet greenfield.",
+    "cta_title": "Essaie sur ton propre CV et ton offre",
+    "cta_desc": "Colle un CV, colle une offre, choisis un mode. Verdict et draft en quelques secondes."
   },
   "publications": {
     "title": "Publications & Brevets",

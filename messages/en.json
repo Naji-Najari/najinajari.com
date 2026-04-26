@@ -61,12 +61,144 @@
   },
   "projects": {
     "title": "Projects",
-    "visit_site": "Visit site",
-    "coming_soon": "Coming Soon",
-    "ragmaker_title": "RagMaker — Agentic RAG Platform",
-    "ragmaker_desc": "Co-developed an Agentic B2B SaaS platform enabling users to query multi-format documents and connect external tools via conversational AI. Hybrid Search (semantic + keyword), Text-to-SQL, MCP integration, LangGraph agentic workflows.",
-    "multiagent_title": "multi-agent-llm-stack",
-    "multiagent_desc": "End-to-end production ML stack: multi-agent RAG with LangGraph, LLM fine-tuning (LoRA/QLoRA), vLLM serving, Docker, Kubernetes, Prometheus monitoring. Full stack, open source."
+    "read_more": "Read more",
+    "try_it": "Try it",
+    "source_code": "Source code",
+    "career_copilot_title": "Career Copilot · Multi-agent CV × JD analyzer",
+    "career_copilot_desc": "Multi-agent app on Google ADK v2: parses a CV and a job description in parallel, then routes to a recruiter flow (fit verdict + LinkedIn outreach citing a real CV achievement) or a candidate flow (live company research via Tavily MCP + tailored interview prep). Typed Pydantic outputs, Langfuse tracing."
+  },
+  "career_copilot_page": {
+    "meta_title": "Career Copilot · AI for recruiters and candidates | Naji Najari",
+    "meta_description": "Career Copilot reads any CV against any job ad in seconds. Recruiters get a fit verdict and ready-to-send LinkedIn outreach citing real CV achievements. Candidates get live company research and tailored interview prep. Free demo.",
+    "back_to_projects": "Back to projects",
+    "title": "Career Copilot",
+    "tagline": "Drop in a CV and a job ad. Recruiters get a fit verdict and outreach worth sending. Candidates get a company brief and tailored interview prep.",
+    "problem_kicker": "Problem",
+    "solution_kicker": "Solution",
+    "arch_kicker": "Architecture",
+    "agents_kicker": "Agents",
+    "api_kicker": "API",
+    "scale_kicker": "Engineering",
+    "obs_kicker": "Observability",
+    "frontend_kicker": "Frontend",
+    "stack_kicker": "Stack",
+    "problem_title": "Templated AI outreach and generic interview prep waste everyone's time.",
+    "problem_bullets": [
+      "Recruiters drown in copy-pasted messages that ignore half the CV they just received.",
+      "Candidates walk into interviews knowing nothing about the company they applied to.",
+      "Career Copilot answers both sides in one tool: real evidence, real questions, in seconds."
+    ],
+    "modes_title": "Two modes, one tool",
+    "modes_intro": "Pick who you are. The same CV and job ad lead to very different answers.",
+    "recruiter_title": "Recruiter mode",
+    "recruiter_desc": "Know in seconds whether the candidate fits the role. If they do, get a LinkedIn message that does not read like a template.",
+    "recruiter_bullets": [
+      "A clear fit verdict (fit, borderline, or no fit) with confidence and matched evidence from the CV",
+      "A LinkedIn outreach draft that quotes a real achievement from the candidate's CV",
+      "When the fit isn't there: a plain explanation of the gaps and adjacent roles worth pursuing"
+    ],
+    "candidate_title": "Candidate mode",
+    "candidate_desc": "Walk into the interview already knowing the company and what they're likely to ask you.",
+    "candidate_bullets": [
+      "Live company research: funding, culture, Glassdoor signals, recent news",
+      "Targeted CV improvements matched to the job ad, without inventing experience",
+      "Interview prep tailored to the role: probable questions, talking points, smart questions to ask back"
+    ],
+    "architecture_title": "System architecture",
+    "architecture_intro": "Three tiers. A Next.js 15 / React 19 frontend handles uploads, mode selection and live results. A FastAPI backend exposes two stateless endpoints and orchestrates a Google ADK v2 graph workflow. The graph runs eight LLM agents on OpenAI gpt-5.4-mini via LiteLlm, with parallel branches synchronized by JoinNodes and external tooling reached through MCP.",
+    "tier_frontend_title": "Frontend",
+    "tier_frontend_desc": "Next.js 15 (App Router, RSC), React 19, TanStack Query for request state, Zod for client-side validation, Radix UI primitives, Tailwind v4.",
+    "tier_backend_title": "Backend",
+    "tier_backend_desc": "FastAPI with two stateless endpoints, async I/O end-to-end, structured logging middleware, typed error contracts (502 / 500 / 415 / 413 / 422).",
+    "tier_orchestration_title": "LLM orchestration",
+    "tier_orchestration_desc": "Google ADK v2 Workflow graph: parallel parsers, JoinNodes for fan-in sync, FunctionNode routers, sub-agents with Pydantic output schemas, MCP toolset for Tavily.",
+    "architecture_graph_alt": "Career Copilot multi-agent graph",
+    "architecture_legend": "Blue: LLM agents · Green: pure-Python nodes (routers, join) · Orange (dashed): external tools via MCP · Grey: HTTP I/O.",
+    "graph_title": "The agent graph",
+    "graph_intro": "The whole orchestration is declared in one Workflow definition. Edges describe the topology: parallel branches use tuples, routers map symbolic outcomes to next nodes, JoinNodes synchronize fan-in. Determinism comes from the typed state passed between nodes; nothing relies on string parsing.",
+    "agents_title": "The agents",
+    "agents_intro": "Eight LLM agents, two FunctionNode routers, two JoinNodes. Every agent runs OpenAI gpt-5.4-mini via LiteLlm with low reasoning effort by default. The Outreach Writer escalates to medium reasoning for sharper, less generic copy. Each agent's output is a Pydantic schema enforced by ADK's output_schema, except the Research Agent which uses Tavily tools and validates its JSON output at the API boundary.",
+    "agent_role_parser": "Parser",
+    "agent_role_recruiter": "Recruiter",
+    "agent_role_candidate": "Candidate",
+    "agent_cv_parser_desc": "Extracts skills, years of experience, achievements and languages into a typed ParsedCV.",
+    "agent_jd_parser_desc": "Extracts title, company, required and preferred skills, seniority and agency hints into a ParsedJD.",
+    "agent_fit_analyzer_desc": "Compares ParsedCV against ParsedJD and emits a FitVerdict with calibrated confidence, matched strengths and gaps.",
+    "agent_outreach_writer_desc": "Writes a LinkedIn outreach draft that cites one specific CV achievement verbatim. Medium reasoning effort.",
+    "agent_gap_explainer_desc": "On no_fit, explains the gaps in plain language and suggests adjacent roles worth pursuing.",
+    "agent_research_desc": "Calls Tavily search and extract via MCP to gather company intelligence: funding, culture, Glassdoor signals.",
+    "agent_cv_optimizer_desc": "Suggests targeted CV edits to better match the JD, without lying about the candidate's experience.",
+    "agent_interview_prep_desc": "Builds an interview prep bundle: probable questions, talking points and smart reverse questions.",
+    "api_title": "API surface",
+    "api_intro": "Two stateless endpoints, both POST. Every response shape is a Pydantic model. Clients get a strict OpenAPI schema and FastAPI auto-generates the docs at /docs.",
+    "api_analyze_title": "POST /v1/analyze",
+    "api_analyze_desc": "Runs the full graph against a CV + JD pair and returns a typed response discriminated by mode. Errors propagate as structured HTTPExceptions with actionable messages.",
+    "api_pdf_title": "POST /v1/extract-pdf",
+    "api_pdf_desc": "Uploads a PDF, validates content-type and size, returns concatenated page text. Rejects scanned PDFs with no extractable text.",
+    "scale_title": "Engineering for scale",
+    "scale_intro": "Built to scale horizontally on serverless platforms (Cloud Run, HF Spaces) without state coupling between requests. Every design decision favors predictable cost and latency over feature breadth.",
+    "scale_bullets": [
+      {
+        "title": "Stateless workers",
+        "desc": "No in-memory session, no per-instance cache. Every request carries its own state. Drops trivially behind any load balancer or autoscaler."
+      },
+      {
+        "title": "Async end-to-end",
+        "desc": "FastAPI + httpx + ADK async runner. Parallel CV/JD parsing halves the LLM-bound tail latency on every request."
+      },
+      {
+        "title": "Cost-aware reasoning",
+        "desc": "Default low reasoning effort on gpt-5.4-mini. Only the Outreach Writer escalates to medium where copy quality moves the needle."
+      },
+      {
+        "title": "Typed contracts everywhere",
+        "desc": "Pydantic schemas at every node boundary and at the API edge. Invalid LLM output fails fast and loud, not silently with a corrupted downstream state."
+      },
+      {
+        "title": "Strict input validation",
+        "desc": "PDF endpoint enforces content-type and a 10 MB cap. Empty or scanned-only PDFs return 422 with an actionable message instead of a generic 500."
+      },
+      {
+        "title": "Container-ready",
+        "desc": "Dockerfile + uv lockfile. Deploys to Cloud Run, Fly.io, or HF Spaces. Environment-driven config, no hardcoded secrets, no init scripts."
+      }
+    ],
+    "obs_title": "Observability",
+    "obs_intro": "Every request is observable end-to-end via Langfuse. Traces are mode-tagged, model-tagged and version-tagged so regressions are easy to spot.",
+    "obs_bullets": [
+      {
+        "title": "Langfuse spans per request",
+        "desc": "Each /v1/analyze call opens a parent agent observation. Sub-agent calls and tool calls nest under it. Inputs, outputs and token counts captured."
+      },
+      {
+        "title": "Trace propagation",
+        "desc": "propagate_attributes injects mode, model, version, cv_chars and jd_chars into the active trace. Quick filters in the Langfuse UI."
+      },
+      {
+        "title": "Structured logging",
+        "desc": "Custom middleware logs request shape, mode and output state keys. Failures bubble up with full traceback to the agent runner before being remapped to HTTPExceptions."
+      }
+    ],
+    "frontend_title": "Frontend",
+    "frontend_intro": "Next.js 15 with the App Router. React 19 with the new use() and Server Component conventions. Tailwind v4 + Radix primitives in a shadcn-style component library.",
+    "frontend_bullets": [
+      {
+        "title": "TanStack Query for async UX",
+        "desc": "Mutations for /analyze, file upload UX with mutation state. Sonner toasts surface backend errors with the structured 502 / 422 messages."
+      },
+      {
+        "title": "Zod-validated forms",
+        "desc": "Both modes share a single form schema. Client-side validation prevents most 4xx round-trips before they reach the network."
+      },
+      {
+        "title": "PDF upload + paste",
+        "desc": "Two input modes per side (CV / JD): paste text or upload PDF. Upload posts to /v1/extract-pdf, response feeds the same /analyze call."
+      }
+    ],
+    "stack_title": "Stack",
+    "stack_intro": "Modern Python and TypeScript across the board. Every choice is one I would make again on a fresh greenfield project.",
+    "cta_title": "Try it on your own CV and JD",
+    "cta_desc": "Paste a CV, paste a job description, pick a mode. Get a verdict and a draft in seconds."
   },
   "publications": {
     "title": "Publications & Patents",
