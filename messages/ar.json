@@ -71,22 +71,56 @@
     "meta_title": "Career Copilot · ذكاء اصطناعي للمُجنِّدين والمرشحين | ناجي نجاري",
     "meta_description": "يقرأ Career Copilot أي سيرة ذاتية مقابل أي وصف وظيفة في ثوانٍ. يحصل المُجنِّدون على حكم ملاءمة ورسالة LinkedIn جاهزة للإرسال تستشهد بإنجازات حقيقية من السيرة الذاتية. ويحصل المرشحون على بحث مباشر عن الشركة وتحضير مقابلة مخصص. تجربة مجانية.",
     "back_to_projects": "العودة إلى المشاريع",
+    "toc_title": "في هذه الصفحة",
     "title": "Career Copilot",
     "tagline": "ألصق سيرة ذاتية ووصف وظيفة. يحصل المُجنِّدون على حكم ملاءمة ورسالة تواصل تستحق الإرسال. يحصل المرشحون على ملف عن الشركة وتحضير مقابلة مخصص.",
     "problem_kicker": "المشكلة",
     "solution_kicker": "الحل",
+    "design_kicker": "تصميم النظام",
+    "agentic_kicker": "وكيلي",
+    "obs_kicker": "القابلية للمراقبة",
     "arch_kicker": "المعمارية",
     "agents_kicker": "الوكلاء",
     "api_kicker": "API",
     "scale_kicker": "الهندسة",
-    "obs_kicker": "القابلية للمراقبة",
     "frontend_kicker": "الواجهة الأمامية",
     "stack_kicker": "Stack",
-    "problem_title": "رسائل التواصل المنسوخة وتحضير المقابلة العام يضيعان وقت الجميع.",
+    "design_title": "ثلاث طبقات بدون state، ورسم بياني واحد.",
+    "design_intro": "متصفّح يطلب واجهة Next.js 15 / React 19. الواجهة ترسل CV + JD إلى endpoint FastAPI بدون state. الخادم يطلق Workflow على Google ADK v2، ينتظر الاستجابة المكتوبة، ويعيدها. لا شيء مشترك بين الطلبات، لذلك تتوسع كل طبقة أفقياً دون تنسيق، وأي instance يخدم أي طلب.",
+    "agentic_title": "داخل الرسم البياني متعدد الوكلاء.",
+    "agentic_intro": "التنسيق هو تعريف Workflow واحد. Edges تصف فروعاً متوازية (tuples)، توجيهاً شرطياً (FunctionNode + dict mapping)، ومزامنة fan-in (JoinNodes). الحتمية تأتي من state مكتوب يمر بين النودات؛ لا شيء يعتمد على parsing strings، ولا شيء يعبر حدود LLM دون نوع.",
+    "agentic_decisions_title": "قرارات التصميم",
+    "agentic_decisions": [
+      {
+        "title": "تحليل CV / JD بالتوازي",
+        "desc": "استخراجات مستقلة، تُطلق بالتوازي قبل حتى أن يُتخذ قرار الوضع. يقسم زمن الاستجابة tail الخاص بالمعالجة المسبقة إلى النصف على كل طلب."
+      },
+      {
+        "title": "JoinNodes لمزامنة fan-in",
+        "desc": "بدون join صريح، النود التالي يُطلق مرة لكل فرع وارد. JoinNodes تنتظر كل النتائج العلوية وتمرر state موحد للأمام."
+      },
+      {
+        "title": "Routers من نوع FunctionNode، لا LLMs",
+        "desc": "توجيه الوضع والحكم قرارات حتمية على state مكتوب مسبقاً. لا ضريبة LLM، ولا خطر هلوسة على المسار الذي يقرر أي فرع يُطلق."
+      },
+      {
+        "title": "عقود مكتوبة عند كل حد",
+        "desc": "كل وكيل LLM يعلن output_schema من Pydantic يطبّقه ADK. مخرجات غير صالحة تفشل النود بسرعة وبصوت عال بدلاً من إفساد state وكيل في المراحل التالية."
+      },
+      {
+        "title": "Research Agent يفلت من الـ schema",
+        "desc": "ADK لا يستطيع الجمع بين output_schema و tools على gpt-5.4-mini. Research Agent يستخدم أدوات Tavily MCP ويُصدر JSON string يتحقق منه handler الـ API بـ model_validate_json عند الحدود."
+      },
+      {
+        "title": "Reasoning effort مضبوط لكل وكيل",
+        "desc": "Reasoning effort منخفض افتراضياً للحفاظ على تكلفة قابلة للتنبؤ. Outreach Writer هو الوكيل الوحيد المرفوع إلى medium، حيث جودة الرسالة تصنع الفرق."
+      }
+    ],
+    "problem_title": "مشروع جانبي لاستعراض stack أردت إتقانها من البداية للنهاية: Google ADK v2 graphs، FastAPI، Tavily MCP، Langfuse. مطابقة CV × JD هو المجال المختار لأن الاختصارات فيه تنكسر بطرق ممتعة.",
     "problem_bullets": [
-      "يغرق المُجنِّدون في رسائل قوالب تتجاهل نصف السيرة الذاتية التي استلموها للتو.",
-      "يدخل المرشحون المقابلات دون معرفة شيء عن الشركة التي تقدّموا إليها.",
-      "يردّ Career Copilot على الطرفين في أداة واحدة: أدلة حقيقية، أسئلة حقيقية، في ثوانٍ."
+      "نماذج LLM في single-prompt تهلوس إما خبرة المرشح أو وضع الشركة. القارئ يلاحظ ذلك من القراءة الأولى.",
+      "بدون بحث مباشر، تحضير المرشح يبقى عاماً. بدون عقود مكتوبة، رسائل المُجنِّد تنحرف. بدون tracing، يستحيل معرفة لماذا فشل تشغيل محدد.",
+      "ما يُعرض هنا هو التنسيق: parsers بالتوازي، routers حتمية، وكيل يستدعي Tavily عبر MCP، مخرجات Pydantic عند كل حدود node، spans Langfuse للتشغيل الكامل."
     ],
     "modes_title": "وضعان، أداة واحدة",
     "modes_intro": "اختر من أنت. نفس السيرة الذاتية والوظيفة تقود إلى إجابات مختلفة جداً.",
@@ -163,20 +197,20 @@
         "desc": "Dockerfile + lockfile uv. يُنشر على Cloud Run أو Fly.io أو HF Spaces. تكوين عبر متغيرات البيئة، لا أسرار مشفرة، لا scripts تهيئة."
       }
     ],
-    "obs_title": "القابلية للمراقبة",
-    "obs_intro": "كل طلب قابل للمراقبة من البداية للنهاية عبر Langfuse. الـ traces مُعلَّمة بالوضع والنموذج والإصدار لرصد الانحدارات بسهولة.",
+    "obs_title": "كل طلب، متتبَّع من البداية للنهاية عبر Langfuse.",
+    "obs_intro": "نظام LLM لا يمكن تتبّعه هو نظام لا يمكن إصلاحه. كل استدعاء /v1/analyze يفتح observation أبوي في Langfuse. استدعاءات sub-agents و tool calls تتداخل تحته كـ spans فرعية، مع التقاط المُدخلات والمخرجات وزمن الاستجابة وعدد tokens. الوضع والنموذج والإصدار وأحجام المُدخلات تُنشر كـ trace attributes للفلترة السريعة في واجهة Langfuse.",
     "obs_bullets": [
       {
-        "title": "Spans Langfuse لكل طلب",
-        "desc": "كل استدعاء /v1/analyze يفتح observation أبوي. استدعاءات sub-agents و tool calls تتداخل تحته. مُدخَلات ومخرجات وعدد tokens مُلتقطة."
+        "title": "شجرة spans لكل طلب",
+        "desc": "handler الـ /v1/analyze يفتح observation أبوي من نوع 'agent'. ADK يشغّل كل sub-agent و tool call كـ span متداخل تحته. كل المُدخلات والمخرجات وزمن الاستجابة وعدد tokens يُلتقط تلقائياً."
       },
       {
-        "title": "نشر التتبّع",
-        "desc": "propagate_attributes يحقن الوضع والنموذج والإصدار و cv_chars و jd_chars في الـ trace النشط. فلاتر سريعة في واجهة Langfuse."
+        "title": "Trace attributes للفلترة",
+        "desc": "propagate_attributes يحقن الوضع والنموذج والإصدار و cv_chars و jd_chars على الـ trace النشط. فلتر بالوضع في نقرتين، قارن توزيعات الثقة عبر إصدارات النماذج، رصد الانحدارات مبكراً."
       },
       {
-        "title": "Logging مهيكل",
-        "desc": "middleware مخصص يسجّل شكل الطلب والوضع و state keys للمخرجات. الإخفاقات ترتفع بـ traceback كامل إلى agent runner قبل أن تُعاد كـ HTTPExceptions."
+        "title": "فشل سريع عند الحدود",
+        "desc": "أخطاء الوكيل تظهر كـ 502 مع traceback كامل في الـ logs. تناقضات state الـ workflow (FitVerdict مفقود، OutreachDraft مفقود) تظهر كـ 500 مع تفاصيل قابلة للتنفيذ. لا شيء يُبتلع بصمت."
       }
     ],
     "frontend_title": "الواجهة الأمامية",

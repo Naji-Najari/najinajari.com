@@ -71,24 +71,119 @@
     "meta_title": "Career Copilot · AI for recruiters and candidates | Naji Najari",
     "meta_description": "Career Copilot reads any CV against any job ad in seconds. Recruiters get a fit verdict and ready-to-send LinkedIn outreach citing real CV achievements. Candidates get live company research and tailored interview prep. Free demo.",
     "back_to_projects": "Back to projects",
+    "toc_title": "On this page",
     "title": "Career Copilot",
     "tagline": "Drop in a CV and a job ad. Recruiters get a fit verdict and outreach worth sending. Candidates get a company brief and tailored interview prep.",
-    "problem_kicker": "Problem",
-    "solution_kicker": "Solution",
+    "problem_kicker": "Objective",
+    "solution_kicker": "Use case",
+    "design_kicker": "System design",
+    "agentic_kicker": "Agentic architecture",
+    "agentic_comment": "The graph encodes a deliberate separation between deterministic control flow and LLM-driven generation. Routing and synchronization stay in pure Python; only generation crosses an LLM boundary, and every output is constrained by a Pydantic schema before it leaves the node.",
+    "agentic_wiring_subhead": "How the graph is wired",
+    "agentic_wiring_bullets": [
+      {
+        "prefix": "Control flow stays out of the LLMs",
+        "sub": [
+          "Two FunctionNode routers (mode_router, verdict_router) decide branches in pure Python on already-typed state.",
+          "JoinNodes wait for parallel branches to complete before firing downstream.",
+          "No LLM ever decides which branch fires next, which removes a whole class of failure modes from the critical path."
+        ]
+      },
+      {
+        "prefix": "Eight specialised agents, one schema each",
+        "sub": [
+          "Each agent declares its own output_schema: ParsedCV, ParsedJD, FitVerdict, OutreachDraft, GapReport, CompanyIntelligence, CVOptimizationBundle, InterviewPrepBundle."
+        ]
+      },
+      {
+        "prefix": "Two branch topologies on the same parsed inputs",
+        "sub": [
+          "Recruiter branch: linear chain with one conditional split on the fit verdict (fit / borderline → outreach, no_fit → gap report).",
+          "Candidate branch: research and CV positioning fan out in parallel, synchronize through a JoinNode, then feed interview prep.",
+          "The candidate-side parallelism is safe because the two passes have no data dependency on each other."
+        ]
+      },
+      {
+        "prefix": "One escape hatch for tool use",
+        "sub": [
+          "ADK currently disallows combining output_schema with tools on gpt-5.4-mini.",
+          "The Research Agent uses the Tavily MCP toolset and emits its CompanyIntelligence payload as a JSON string.",
+          "The handler validates it with model_validate_json at the API boundary, preserving the typed-state invariant at the edge."
+        ]
+      }
+    ],
+    "obs_kicker": "Observability",
     "arch_kicker": "Architecture",
     "agents_kicker": "Agents",
     "api_kicker": "API",
     "scale_kicker": "Engineering",
-    "obs_kicker": "Observability",
     "frontend_kicker": "Frontend",
     "stack_kicker": "Stack",
-    "problem_title": "Templated AI outreach and generic interview prep waste everyone's time.",
-    "problem_bullets": [
-      "Recruiters drown in copy-pasted messages that ignore half the CV they just received.",
-      "Candidates walk into interviews knowing nothing about the company they applied to.",
-      "Career Copilot answers both sides in one tool: real evidence, real questions, in seconds."
+    "design_title": "The agentic graph above only ships if it is exposed through a stateless API and reachable from a UI. Two clean layers do that without leaking complexity into the graph.",
+    "design_backend_subhead": "Backend",
+    "design_backend_bullets": [
+      { "prefix": "FastAPI exposes the graph", "desc": "two stateless POST endpoints (/v1/analyze, /v1/extract-pdf). Auto-generated OpenAPI schema and native Pydantic integration." },
+      { "prefix": "Async end-to-end", "desc": "FastAPI plus the ADK async runner so parallel branches in the graph actually run in parallel." },
+      { "prefix": "Container-ready", "desc": "single Dockerfile, uv lockfile. Deploys identically on Cloud Run, Fly.io, or HuggingFace Spaces." }
     ],
-    "modes_title": "Two modes, one tool",
+    "design_frontend_subhead": "Frontend",
+    "design_frontend_bullets": [
+      { "prefix": "Thin Next.js 15 client", "desc": "collect inputs, POST to /v1/analyze, render the typed response. All business logic stays in the backend graph." },
+      { "prefix": "TanStack Query for the analyze call", "desc": "useMutation drives the flow; Sonner toasts surface the structured 502 / 422 errors from the backend." },
+      { "prefix": "Zod-validated forms", "desc": "a single analyzeInputSchema for both modes. Paste text or upload a PDF (routed through /v1/extract-pdf first)." }
+    ],
+    "design_intro_unused": "A browser hits a Next.js 15 / React 19 frontend. The frontend posts CV + JD to a stateless FastAPI endpoint. The backend kicks off a Google ADK v2 Workflow graph, awaits the typed response, and returns it. Nothing is shared between requests, so every layer scales horizontally without coordination, and any instance can serve any request.",
+    "agentic_title": "Inside the multi-agent graph.",
+    "agentic_intro": "The orchestration is one Workflow definition. Edges describe parallel branches (tuples), conditional routing (FunctionNode + dict mapping), and fan-in synchronization (JoinNodes). Determinism comes from the typed state passed between nodes; nothing relies on parsing strings, nothing flows untyped across an LLM boundary.",
+    "agentic_decisions_title": "Design decisions",
+    "agentic_decisions": [
+      {
+        "title": "Parallel CV / JD parsing",
+        "desc": "Independent extractions, fired concurrently before the mode decision is even taken. Halves the preprocessing tail latency on every request."
+      },
+      {
+        "title": "JoinNodes for fan-in sync",
+        "desc": "Without an explicit join, the next node would fire once per incoming branch. JoinNodes wait for all upstream results and pass a unified state forward."
+      },
+      {
+        "title": "FunctionNode routers, not LLMs",
+        "desc": "Mode and verdict routing are deterministic decisions on already-typed state. No LLM tax, no hallucination risk on the code path that decides which branch fires."
+      },
+      {
+        "title": "Typed contracts at every boundary",
+        "desc": "Each LLM agent declares a Pydantic output_schema enforced by ADK. Invalid output fails the node fast and loud instead of corrupting state in a downstream agent."
+      },
+      {
+        "title": "Research Agent escapes the schema",
+        "desc": "ADK cannot combine output_schema with tools on gpt-5.4-mini. Research Agent uses Tavily MCP tools and emits a JSON string the API handler validates with model_validate_json at the boundary."
+      },
+      {
+        "title": "Reasoning effort, dialled per agent",
+        "desc": "Default low reasoning effort to keep cost predictable. The Outreach Writer is the only agent dialled up to medium, where copy quality moves the needle."
+      }
+    ],
+    "problem_title": "Google ADK v2 shipped its graph workflow API recently. I wanted to push it end-to-end on a real use case, in the spirit of LangGraph.",
+    "problem_subhead": "Why a graph",
+    "problem_bullets": [
+      { "prefix": "Explicit topology", "desc": "nodes, edges, parallel branches, conditional routing, and sync points are first-class." },
+      { "prefix": "Testable units", "desc": "each node can be unit-tested, swapped, or traced on its own." },
+      { "prefix": "Typed state", "desc": "contracts at every step instead of free-form prompt parsing." },
+      { "prefix": "Predictable cost", "desc": "you know upfront which steps run, in what order, and what model serves each one." }
+    ],
+    "modes_title": "Upload a CV and a job description. An agent pipeline runs the full analysis and produces an output tailored to whichever side of the hiring loop is asking, recruiter or candidate.",
+    "modes_subhead": "What it does",
+    "modes_bullets": [
+      { "prefix": "Shared preprocessing", "desc": "the CV and the job description are parsed in parallel into typed objects (skills, years of experience, achievements, required vs preferred skills, seniority). All branching happens after parsing." },
+      { "prefix": "Recruiter flow", "desc": "scores how well the candidate fits the role (fit, borderline, or no fit), then either drafts a LinkedIn outreach quoting a real achievement from the CV, or explains the gaps and suggests adjacent roles." },
+      { "prefix": "Candidate flow", "desc": "live company research via Tavily MCP (funding, culture, recent news), CV positioning suggestions tailored to the job ad, and an interview prep bundle with probable questions and talking points." }
+    ],
+    "modes_graph_subhead": "Why we need a graph",
+    "modes_graph_bullets": [
+      { "prefix": "Shared work, divergent outputs", "desc": "both flows reuse the same parsed CV and JD, then produce completely different artefacts. A single big-prompt agent would need a sprawling conditional prompt; a graph makes the split natural." },
+      { "prefix": "Parallelism halves latency", "desc": "parsing the CV and the JD concurrently, then on the candidate side running research and CV positioning in parallel. A linear chain would force these steps to run one after the other." },
+      { "prefix": "Branching has to be deterministic", "desc": "routing on the fit verdict (fit or borderline → outreach, no_fit → gap explainer) cannot depend on an LLM re-parsing its own output. A FunctionNode router decides in pure Python on a typed verdict." },
+      { "prefix": "Why this domain fits", "desc": "small enough to ship as a side project, real enough to expose failure modes, rich enough to need every one of the affordances above." }
+    ],
     "modes_intro": "Pick who you are. The same CV and job ad lead to very different answers.",
     "recruiter_title": "Recruiter mode",
     "recruiter_desc": "Know in seconds whether the candidate fits the role. If they do, get a LinkedIn message that does not read like a template.",
@@ -163,20 +258,20 @@
         "desc": "Dockerfile + uv lockfile. Deploys to Cloud Run, Fly.io, or HF Spaces. Environment-driven config, no hardcoded secrets, no init scripts."
       }
     ],
-    "obs_title": "Observability",
-    "obs_intro": "Every request is observable end-to-end via Langfuse. Traces are mode-tagged, model-tagged and version-tagged so regressions are easy to spot.",
+    "obs_title": "Every request, traced end-to-end with Langfuse.",
+    "obs_intro": "An LLM system you cannot trace is a system you cannot fix. Every /v1/analyze call opens a parent agent observation in Langfuse. Sub-agent and tool calls nest under it as child spans, with inputs, outputs, latency and token counts captured. Mode, model, version and input sizes are propagated as trace attributes for fast filtering in the Langfuse UI.",
     "obs_bullets": [
       {
-        "title": "Langfuse spans per request",
-        "desc": "Each /v1/analyze call opens a parent agent observation. Sub-agent calls and tool calls nest under it. Inputs, outputs and token counts captured."
+        "title": "Per-request span tree",
+        "desc": "The /v1/analyze handler opens a parent observation typed as 'agent'. ADK runs each sub-agent and tool call as a nested span under it. Every input, output, latency and token count is captured automatically."
       },
       {
-        "title": "Trace propagation",
-        "desc": "propagate_attributes injects mode, model, version, cv_chars and jd_chars into the active trace. Quick filters in the Langfuse UI."
+        "title": "Trace attributes for filtering",
+        "desc": "propagate_attributes injects mode, model, version, cv_chars and jd_chars onto the active trace. Filter by mode in two clicks, compare confidence distributions across model versions, spot regressions early."
       },
       {
-        "title": "Structured logging",
-        "desc": "Custom middleware logs request shape, mode and output state keys. Failures bubble up with full traceback to the agent runner before being remapped to HTTPExceptions."
+        "title": "Fail-fast at the boundary",
+        "desc": "Agent errors surface as 502 with the full traceback in logs. Workflow state inconsistencies (missing FitVerdict, missing OutreachDraft) surface as 500 with actionable detail. Nothing is silently swallowed."
       }
     ],
     "frontend_title": "Frontend",

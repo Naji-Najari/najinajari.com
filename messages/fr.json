@@ -71,22 +71,56 @@
     "meta_title": "Career Copilot · IA pour recruteurs et candidats | Naji Najari",
     "meta_description": "Career Copilot lit n'importe quel CV face à n'importe quelle offre en quelques secondes. Les recruteurs obtiennent un verdict de fit et un message LinkedIn prêt à envoyer citant des réalisations concrètes du CV. Les candidats obtiennent une recherche live sur l'entreprise et une préparation d'entretien sur mesure. Démo gratuite.",
     "back_to_projects": "Retour aux projets",
+    "toc_title": "Sur cette page",
     "title": "Career Copilot",
     "tagline": "Colle un CV et une offre. Les recruteurs obtiennent un verdict de fit et un outreach qui vaut le coup d'être envoyé. Les candidats obtiennent un brief sur l'entreprise et une préparation d'entretien sur mesure.",
     "problem_kicker": "Problème",
     "solution_kicker": "Solution",
+    "design_kicker": "Conception système",
+    "agentic_kicker": "Agentique",
+    "obs_kicker": "Observabilité",
     "arch_kicker": "Architecture",
     "agents_kicker": "Agents",
     "api_kicker": "API",
     "scale_kicker": "Ingénierie",
-    "obs_kicker": "Observabilité",
     "frontend_kicker": "Frontend",
     "stack_kicker": "Stack",
-    "problem_title": "Les messages d'outreach copiés-collés et la prépa d'entretien générique font perdre du temps à tout le monde.",
+    "design_title": "Trois couches stateless, un seul graphe.",
+    "design_intro": "Un navigateur tape sur un frontend Next.js 15 / React 19. Le frontend poste CV + offre vers un endpoint FastAPI stateless. Le backend lance un Workflow Google ADK v2, attend la réponse typée, et la renvoie. Rien n'est partagé entre les requêtes, donc chaque couche scale horizontalement sans coordination, et n'importe quelle instance peut servir n'importe quelle requête.",
+    "agentic_title": "Au cœur du graphe multi-agents.",
+    "agentic_intro": "L'orchestration est une seule définition Workflow. Les edges décrivent des branches parallèles (tuples), du routage conditionnel (FunctionNode + dict mapping), et la synchronisation fan-in (JoinNodes). Le déterminisme vient du state typé qui passe entre les nodes ; rien ne dépend du parsing de strings, rien ne traverse une frontière LLM en non-typé.",
+    "agentic_decisions_title": "Décisions de design",
+    "agentic_decisions": [
+      {
+        "title": "Parsing CV / offre en parallèle",
+        "desc": "Extractions indépendantes, lancées en concurrence avant même que la décision de mode soit prise. Divise par deux la latence tail du préprocessing à chaque requête."
+      },
+      {
+        "title": "JoinNodes pour la synchro fan-in",
+        "desc": "Sans join explicite, le node suivant fire une fois par branche entrante. Les JoinNodes attendent tous les résultats amont et passent un state unifié."
+      },
+      {
+        "title": "Routers FunctionNode, pas LLMs",
+        "desc": "Le routage de mode et de verdict sont des décisions déterministes sur du state déjà typé. Pas de tax LLM, pas de risque d'hallucination sur le code path qui décide quelle branche fire."
+      },
+      {
+        "title": "Contrats typés à chaque frontière",
+        "desc": "Chaque agent LLM déclare un output_schema Pydantic appliqué par ADK. Une sortie invalide fail le node bruyamment au lieu de corrompre le state d'un agent en aval."
+      },
+      {
+        "title": "Le Research Agent échappe au schema",
+        "desc": "ADK ne peut pas combiner output_schema et tools sur gpt-5.4-mini. Le Research Agent utilise les tools Tavily MCP et émet un JSON string que le handler API valide avec model_validate_json à la frontière."
+      },
+      {
+        "title": "Reasoning effort, ajusté par agent",
+        "desc": "Reasoning effort low par défaut pour garder le coût prédictible. Seul l'Outreach Writer monte à medium, là où la qualité du message fait la différence sur un recruteur qui clique vraiment sur envoyer."
+      }
+    ],
+    "problem_title": "Side project pour pousser une stack que je voulais maîtriser de bout en bout : Google ADK v2 graphs, FastAPI, Tavily MCP, Langfuse. CV × Offre est le domaine choisi parce que les raccourcis y cassent de manière intéressante.",
     "problem_bullets": [
-      "Les recruteurs croulent sous des messages templates qui ignorent la moitié du CV qu'ils viennent de recevoir.",
-      "Les candidats arrivent en entretien sans rien savoir de la boîte chez laquelle ils ont postulé.",
-      "Career Copilot répond aux deux côtés dans un seul outil : preuves concrètes, vraies questions, en quelques secondes."
+      "Les LLMs en single-prompt hallucinent soit l'expérience du candidat, soit la situation de l'entreprise. Le lecteur le repère à la première lecture.",
+      "Sans recherche live, la prépa candidat reste générique. Sans contrats typés, l'outreach recruteur dérive. Sans tracing, impossible de dire pourquoi un run précis a échoué.",
+      "Ce qui est montré ici c'est l'orchestration : parsers en parallèle, routers déterministes, un agent qui appelle Tavily via MCP, des sorties Pydantic à chaque frontière de node, des spans Langfuse pour le run complet."
     ],
     "modes_title": "Deux modes, un seul outil",
     "modes_intro": "Choisis qui tu es. Le même CV et la même offre mènent à des réponses très différentes.",
@@ -163,20 +197,20 @@
         "desc": "Dockerfile + lockfile uv. Déploie sur Cloud Run, Fly.io ou HF Spaces. Config par variables d'environnement, pas de secrets hardcodés, pas de scripts d'init."
       }
     ],
-    "obs_title": "Observabilité",
-    "obs_intro": "Chaque requête est observable de bout en bout via Langfuse. Les traces sont taggées par mode, modèle et version pour repérer facilement les régressions.",
+    "obs_title": "Chaque requête, tracée de bout en bout avec Langfuse.",
+    "obs_intro": "Un système LLM qu'on ne peut pas tracer est un système qu'on ne peut pas réparer. Chaque appel /v1/analyze ouvre une observation parente dans Langfuse. Les appels sub-agents et tool calls s'imbriquent dessous comme des spans enfants, avec inputs, outputs, latence et token counts capturés. Mode, modèle, version et tailles d'inputs sont propagés en attributs de trace pour un filtrage rapide dans l'UI.",
     "obs_bullets": [
       {
-        "title": "Spans Langfuse par requête",
-        "desc": "Chaque appel /v1/analyze ouvre une observation parente. Les appels sub-agents et tool calls s'imbriquent dessous. Inputs, outputs et token counts capturés."
+        "title": "Arbre de spans par requête",
+        "desc": "Le handler /v1/analyze ouvre une observation parente typée 'agent'. ADK lance chaque sub-agent et tool call comme un span imbriqué dessous. Inputs, outputs, latence et token counts capturés automatiquement."
       },
       {
-        "title": "Propagation de trace",
-        "desc": "propagate_attributes injecte mode, modèle, version, cv_chars et jd_chars dans la trace active. Filtres rapides dans l'UI Langfuse."
+        "title": "Attributs de trace pour filtrer",
+        "desc": "propagate_attributes injecte mode, modèle, version, cv_chars et jd_chars sur la trace active. Filtre par mode en deux clics, compare les distributions de confiance entre versions de modèle, repère les régressions tôt."
       },
       {
-        "title": "Logging structuré",
-        "desc": "Middleware custom qui log la shape de la requête, le mode et les state keys de sortie. Les failures remontent avec full traceback à l'agent runner avant d'être remappées en HTTPExceptions."
+        "title": "Fail-fast à la frontière",
+        "desc": "Les erreurs d'agent remontent en 502 avec full traceback dans les logs. Les incohérences de state workflow (FitVerdict manquant, OutreachDraft manquant) remontent en 500 avec un détail actionnable. Rien n'est silencieusement avalé."
       }
     ],
     "frontend_title": "Frontend",

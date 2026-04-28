@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import {
   ArrowLeft,
+  ArrowUpRight,
   Briefcase,
   CheckCircle2,
   Cpu,
@@ -19,9 +20,11 @@ import {
 import { FaGithub } from "react-icons/fa";
 import Dock from "@/components/dock";
 import Footer from "@/components/footer";
+import { codeToHtml } from "shiki";
 import { GridBackground } from "@/components/grid-background";
+import { Highlighter } from "@/components/ui/highlighter";
 import { ShimmerLink } from "@/components/ui/shimmer-button";
-import { logoUrl } from "@/lib/logo";
+import { TableOfContents } from "@/components/ui/table-of-contents";
 import { routing, type Locale } from "@/i18n/routing";
 
 type Params = { locale: string };
@@ -87,23 +90,6 @@ export async function generateMetadata({
   };
 }
 
-const techStack = [
-  { name: "Google ADK v2", domain: "google.com" },
-  { name: "OpenAI gpt-5.4-mini", domain: "openai.com" },
-  { name: "FastAPI", domain: "fastapi.tiangolo.com" },
-  { name: "Pydantic", domain: "pydantic.dev" },
-  { name: "Tavily MCP", domain: "tavily.com" },
-  { name: "Langfuse", domain: "langfuse.com" },
-  { name: "Next.js 15", domain: "nextjs.org" },
-  { name: "React 19", domain: "react.dev" },
-  { name: "TanStack Query", domain: "tanstack.com" },
-  { name: "Zod", domain: "zod.dev" },
-  { name: "Tailwind CSS v4", domain: "tailwindcss.com" },
-  { name: "Radix UI", domain: "radix-ui.com" },
-  { name: "uv", domain: "astral.sh" },
-  { name: "Docker", domain: "docker.com" },
-];
-
 // Shields.io-style two-tone badges (same visual as career-copilot README + frontend).
 const STACK_SHIELDS = [
   { label: "Python", value: "3.12", color: "#3776AB" },
@@ -162,25 +148,36 @@ function H2({
   );
 }
 
-function CodeBlock({ children, language }: { children: string; language: string }) {
+async function CodeBlock({
+  children,
+  language,
+}: {
+  children: string;
+  language: string;
+}) {
+  const lang = language.split(/[ ·]/)[0].trim() || "text";
+  const html = await codeToHtml(children, {
+    lang,
+    themes: { light: "one-light", dark: "one-dark-pro" },
+    defaultColor: false,
+  });
   return (
-    <div className="not-prose rounded-xl overflow-hidden border border-border bg-neutral-950 my-6">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-neutral-800">
-        <span className="text-[10px] uppercase tracking-wide text-neutral-500 font-mono">
+    <div className="not-prose rounded-xl overflow-hidden border border-border bg-[var(--shiki-light-bg,#f6f8fa)] dark:bg-[var(--shiki-dark-bg,#0d1117)] my-6">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/40">
+        <div className="flex gap-1.5">
+          <span className="size-2.5 rounded-full bg-[#ff5f56]" />
+          <span className="size-2.5 rounded-full bg-[#ffbd2e]" />
+          <span className="size-2.5 rounded-full bg-[#27c93f]" />
+        </div>
+        <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-mono">
           {language}
         </span>
-        <div className="flex gap-1.5">
-          <span className="size-2.5 rounded-full bg-neutral-700" />
-          <span className="size-2.5 rounded-full bg-neutral-700" />
-          <span className="size-2.5 rounded-full bg-neutral-700" />
-        </div>
       </div>
-      <pre
-        className="p-4 text-xs leading-relaxed text-neutral-100 overflow-x-auto"
+      <div
+        className="text-xs leading-relaxed overflow-x-auto [&_pre]:p-4 [&_pre]:bg-transparent [&_code]:bg-transparent"
         dir="ltr"
-      >
-        <code>{children}</code>
-      </pre>
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
     </div>
   );
 }
@@ -194,13 +191,24 @@ export default async function CareerCopilotPage({
   assertLocale(locale);
   const t = await getTranslations({ locale, namespace: "career_copilot_page" });
   const tProjects = await getTranslations({ locale, namespace: "projects" });
+  const tHero = await getTranslations({ locale, namespace: "hero" });
 
-  const problemBullets = t.raw("problem_bullets") as string[];
-  const recruiterBullets = t.raw("recruiter_bullets") as string[];
-  const candidateBullets = t.raw("candidate_bullets") as string[];
-  const scaleBullets = t.raw("scale_bullets") as { title: string; desc: string }[];
+  const problemBullets = t.raw("problem_bullets") as { prefix: string; desc: string }[];
+  const modesBullets = t.raw("modes_bullets") as { prefix: string; desc: string }[];
+  const modesGraphBullets = t.raw("modes_graph_bullets") as { prefix: string; desc: string }[];
+  const agenticWiringBullets = t.raw("agentic_wiring_bullets") as {
+    prefix: string;
+    sub: string[];
+  }[];
   const obsBullets = t.raw("obs_bullets") as { title: string; desc: string }[];
-  const frontendBullets = t.raw("frontend_bullets") as { title: string; desc: string }[];
+  const designBackendBullets = t.raw("design_backend_bullets") as {
+    prefix: string;
+    desc: string;
+  }[];
+  const designFrontendBullets = t.raw("design_frontend_bullets") as {
+    prefix: string;
+    desc: string;
+  }[];
 
   const agents = [
     { name: "CV Parser", role: t("agent_role_parser"), description: t("agent_cv_parser_desc"), output: "ParsedCV", icon: UserSearch },
@@ -217,6 +225,14 @@ export default async function CareerCopilotPage({
     { icon: Layers, title: t("tier_frontend_title"), desc: t("tier_frontend_desc") },
     { icon: Server, title: t("tier_backend_title"), desc: t("tier_backend_desc") },
     { icon: Cpu, title: t("tier_orchestration_title"), desc: t("tier_orchestration_desc") },
+  ];
+
+  const tocItems = [
+    { id: "objective", label: t("problem_kicker") },
+    { id: "modes", label: t("solution_kicker") },
+    { id: "agentic", label: t("agentic_kicker") },
+    { id: "system-design", label: t("design_kicker") },
+    { id: "observability", label: t("obs_kicker") },
   ];
 
   const graphSnippet = `root_agent = Workflow(
@@ -245,53 +261,82 @@ export default async function CareerCopilotPage({
     ],
 )`;
 
-  const apiSnippet = `POST /v1/analyze
-Content-Type: application/json
+  const fastapiSnippet = `# Discriminated union: clients get one of three typed response
+# shapes, picked by the requested mode.
+AnalyzeResponse = Union[
+    RecruiterFitResponse,    # recruiter mode, fit / borderline
+    RecruiterNoFitResponse,  # recruiter mode, no_fit
+    CandidateResponse,       # candidate mode
+]
 
-{
-  "cv_text": "Senior AI Engineer · 6y experience...",
-  "jd_text": "We are looking for a Staff ML Engineer...",
-  "mode": "recruiter"
-}
 
-200 OK · RecruiterFitResponse | RecruiterNoFitResponse | CandidateResponse
-502 Bad Gateway · agent run failed
-500 Internal Server Error · expected workflow state missing`;
+@router.post("/v1/analyze", response_model=AnalyzeResponse)
+async def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
+    """Run the agent graph against a CV + JD pair, return the typed result."""
 
-  const pdfSnippet = `POST /v1/extract-pdf
-Content-Type: multipart/form-data
+    # ADK Workflow graph runs end-to-end. Parallel branches actually
+    # execute in parallel thanks to the async runner.
+    state = await run_agent(root_agent, initial_state)
 
-file: <pdf binary, max 10 MB>
+    # Pydantic schemas at every node boundary guarantee state is typed
+    # where it matters; we just pick the right response builder.
+    return (
+        _build_recruiter_response(state)
+        if request.mode == "recruiter"
+        else _build_candidate_response(state)
+    )`;
 
-200 OK · { "text": "..." }
-413 Request Entity Too Large
-415 Unsupported Media Type
-422 Unprocessable Entity · scanned image, no text extractable`;
+  const langfuseSnippet = `@router.post("/analyze", response_model=AnalyzeResponse)
+async def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
+    langfuse = get_client()
+    with langfuse.start_as_current_observation(
+        name=f"analyze.{request.mode}",
+        as_type="agent",
+        input={"mode": request.mode, "cv_text": ..., "jd_text": ...},
+    ) as span, propagate_attributes(
+        trace_name=f"career-copilot.analyze.{request.mode}",
+        tags=["analyze", request.mode],
+        metadata={
+            "mode": request.mode,
+            "model": PRIMARY_MODEL,
+            "version": VERSION,
+            "cv_chars": str(len(request.cv_text)),
+            "jd_chars": str(len(request.jd_text)),
+        },
+    ):
+        state = await run_agent(root_agent, initial_state)
+        response = _build_response(state)
+        span.update(output=response.model_dump())
+        return response`;
 
   return (
-    <>
+    <div className="min-h-screen relative">
       <GridBackground />
       <Dock />
-      <main className="relative pt-28 pb-20 px-6">
-        <article className="max-w-3xl mx-auto">
-          {/* Back link */}
+
+      {/* HEADER section (full-width, border-b, magicui pattern) */}
+      <div className="space-y-4 border-b border-border relative z-10 pt-20">
+        <div className="max-w-7xl mx-auto flex flex-col gap-6 p-6">
+          {/* Back button alone, left-aligned */}
           <Link
             href={`/${locale}#projects`}
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 rounded-md px-1"
+            aria-label={t("back_to_projects")}
+            className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-border bg-background hover:bg-muted/60 transition-colors w-fit"
           >
-            <ArrowLeft className="size-4" />
-            {t("back_to_projects")}
+            <ArrowLeft className="w-4 h-4" />
           </Link>
 
-          {/* Header (centered, magicui pattern) */}
-          <header className="mb-10 text-center">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight tracking-tight mb-5">
-              {t("title")}
+          {/* Centered block: h1, tagline, shields, buttons */}
+          <div className="text-center flex flex-col items-center gap-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tighter text-balance text-foreground">
+              <Highlighter action="underline" color="#0ea5e9" strokeWidth={3}>
+                {t("title")}
+              </Highlighter>
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground leading-relaxed mb-6 text-pretty max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-4xl md:text-lg md:text-balance mx-auto">
               {t("tagline")}
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-1.5 mb-7">
+            <div className="flex flex-wrap items-center justify-center gap-1.5">
               {STACK_SHIELDS.map((item) => (
                 <Shield key={item.label} {...item} />
               ))}
@@ -306,226 +351,234 @@ file: <pdf binary, max 10 MB>
                 {tProjects("source_code")}
               </ShimmerLink>
             </div>
-          </header>
+          </div>
+        </div>
+      </div>
 
-          {/* Cover (after header) */}
-          <div className="relative aspect-[2/1] w-full overflow-hidden rounded-2xl border border-border shadow-xl mb-10">
+      {/* MAIN + ASIDE — flex with vertical dividers (magicui pattern) */}
+      <div className="flex divide-x divide-border relative max-w-7xl mx-auto px-4 md:px-0 z-10">
+        <div
+          aria-hidden
+          className="absolute max-w-7xl mx-auto left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] lg:w-full h-full border-x border-border pointer-events-none"
+        />
+        <main className="w-full p-0 overflow-hidden">
+          {/* Cover — agent graph diagram on subtle gradient + dot pattern */}
+          <div className="relative w-full h-[500px] overflow-hidden border-b border-border bg-gradient-to-br from-background via-muted/40 to-background">
+            <div
+              aria-hidden
+              className="absolute inset-0 opacity-50 [background-image:radial-gradient(circle,var(--color-border)_1px,transparent_1px)] [background-size:20px_20px]"
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent"
+            />
             <Image
-              src="/projects/career-copilot.png"
-              alt={t("title")}
+              src="/projects/career-copilot-graph.svg"
+              alt={t("architecture_graph_alt")}
               fill
               priority
-              sizes="(max-width: 768px) 100vw, 768px"
-              className="object-cover"
+              sizes="100vw"
+              className="relative z-10 object-contain p-6 md:p-12 block dark:hidden"
+            />
+            <Image
+              src="/projects/career-copilot-graph-dark.svg"
+              alt={t("architecture_graph_alt")}
+              fill
+              priority
+              sizes="100vw"
+              className="relative z-10 object-contain p-6 md:p-12 hidden dark:block"
             />
           </div>
 
-          {/* Body */}
-          <div>
-            {/* PROBLEM */}
-            <H2 number="01">{t("problem_kicker")}</H2>
-            <p className="text-xl md:text-2xl font-medium text-foreground leading-snug mt-4 mb-8">
-              {t("problem_title")}
-            </p>
-            <ul className="space-y-3 my-6">
+          <div className="p-6 lg:p-10">
+            <div className="prose dark:prose-invert max-w-none prose-headings:scroll-mt-8 prose-headings:font-semibold prose-a:no-underline prose-headings:tracking-tight prose-headings:text-balance prose-p:tracking-tight prose-lg prose-strong:text-foreground prose-a:text-primary-sky hover:prose-a:underline">
+            {/* OBJECTIVE — magicui prose pattern */}
+            <H2 number="01" id="objective">{t("problem_kicker")}</H2>
+            <p>{t("problem_title")}</p>
+            <h3>{t("problem_subhead")}</h3>
+            <ul>
               {problemBullets.map((b, i) => (
-                <li
-                  key={i}
-                  className="flex gap-3 items-start text-base text-foreground/90 leading-relaxed"
-                >
-                  <span
-                    aria-hidden
-                    className="mt-2 size-1.5 rounded-full bg-primary-sky shrink-0"
-                  />
-                  <span>{b}</span>
+                <li key={i}>
+                  <strong>{b.prefix}</strong>: {b.desc}
                 </li>
               ))}
             </ul>
 
-            {/* MODES */}
-            <H2 number="02" id="modes">{t("modes_title")}</H2>
-            <p className="text-base text-foreground/80 leading-relaxed mb-6">
-              {t("modes_intro")}
-            </p>
-            <div className="not-prose grid gap-5 md:grid-cols-2 my-8">
-              <article className="rounded-2xl border border-border bg-card/60 p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 rounded-lg bg-primary-sky/10 text-primary-sky">
-                    <UserSearch className="size-4" />
-                  </div>
-                  <h3 className="text-base font-bold text-foreground">
-                    {t("recruiter_title")}
-                  </h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                  {t("recruiter_desc")}
-                </p>
-                <ul className="space-y-2">
-                  {recruiterBullets.map((b, i) => (
-                    <li key={i} className="flex gap-2 text-sm text-foreground">
-                      <CheckCircle2 className="size-4 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>{b}</span>
-                    </li>
-                  ))}
-                </ul>
-              </article>
-              <article className="rounded-2xl border border-border bg-card/60 p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                    <Briefcase className="size-4" />
-                  </div>
-                  <h3 className="text-base font-bold text-foreground">
-                    {t("candidate_title")}
-                  </h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                  {t("candidate_desc")}
-                </p>
-                <ul className="space-y-2">
-                  {candidateBullets.map((b, i) => (
-                    <li key={i} className="flex gap-2 text-sm text-foreground">
-                      <CheckCircle2 className="size-4 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>{b}</span>
-                    </li>
-                  ))}
-                </ul>
-              </article>
+            {/* USE CASE — magicui prose pattern */}
+            <H2 number="02" id="modes">{t("solution_kicker")}</H2>
+            <p>{t("modes_title")}</p>
+            <div className="not-prose my-8 rounded-xl border border-border bg-gradient-to-br from-background via-muted/40 to-background overflow-hidden">
+              <div
+                aria-hidden
+                className="absolute inset-0 opacity-40 [background-image:radial-gradient(circle,var(--color-border)_1px,transparent_1px)] [background-size:18px_18px]"
+              />
+              <Image
+                src="/projects/use-case-flow.svg"
+                alt="Career Copilot high-level flow"
+                width={900}
+                height={300}
+                className="relative z-10 mx-auto block dark:hidden p-4 md:p-6 max-w-full h-auto"
+              />
+              <Image
+                src="/projects/use-case-flow-dark.svg"
+                alt="Career Copilot high-level flow"
+                width={900}
+                height={300}
+                className="relative z-10 mx-auto hidden dark:block p-4 md:p-6 max-w-full h-auto"
+              />
             </div>
+            <h3>{t("modes_subhead")}</h3>
+            <ul>
+              {modesBullets.map((b, i) => (
+                <li key={i}>
+                  <strong>{b.prefix}</strong>: {b.desc}
+                </li>
+              ))}
+            </ul>
+            <h3>{t("modes_graph_subhead")}</h3>
+            <ul>
+              {modesGraphBullets.map((b, i) => (
+                <li key={i}>
+                  <strong>{b.prefix}</strong>: {b.desc}
+                </li>
+              ))}
+            </ul>
 
-            {/* ARCHITECTURE */}
-            <H2 number="03" id="architecture">{t("architecture_title")}</H2>
-            <p className="text-base text-foreground/80 leading-relaxed mb-6">
-              {t("architecture_intro")}
-            </p>
-            <div className="not-prose grid gap-3 sm:grid-cols-3 my-6">
-              {tiers.map((tier) => {
-                const Icon = tier.icon;
-                return (
-                  <div
-                    key={tier.title}
-                    className="rounded-xl border border-border bg-card/60 p-4"
-                  >
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <Icon className="size-4 text-primary-sky" />
-                      <h3 className="text-xs font-bold text-foreground">
-                        {tier.title}
-                      </h3>
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {tier.desc}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="not-prose rounded-2xl border border-border bg-card/60 p-4 md:p-6 my-6 overflow-x-auto">
+            {/* 03 AGENTIC ARCHITECTURE — schema → comment → code → agent cards */}
+            <H2 number="03" id="agentic">{t("agentic_kicker")}</H2>
+
+            {/* Schema (gradient bg + dot pattern) */}
+            <div className="not-prose relative rounded-2xl border border-border bg-gradient-to-br from-background via-muted/40 to-background overflow-hidden my-8">
+              <div
+                aria-hidden
+                className="absolute inset-0 opacity-40 [background-image:radial-gradient(circle,var(--color-border)_1px,transparent_1px)] [background-size:18px_18px]"
+              />
               <Image
                 src="/projects/career-copilot-graph.svg"
                 alt={t("architecture_graph_alt")}
                 width={1100}
                 height={500}
-                className="block dark:hidden max-w-full h-auto mx-auto"
+                className="relative z-10 mx-auto block dark:hidden p-4 md:p-6 max-w-full h-auto"
               />
               <Image
                 src="/projects/career-copilot-graph-dark.svg"
                 alt={t("architecture_graph_alt")}
                 width={1100}
                 height={500}
-                className="hidden dark:block max-w-full h-auto mx-auto"
+                className="relative z-10 mx-auto hidden dark:block p-4 md:p-6 max-w-full h-auto"
               />
             </div>
-            <p className="text-xs text-muted-foreground italic">
-              {t("architecture_legend")}
-            </p>
 
-            {/* AGENTS */}
-            <H2 number="04" id="agents">{t("agents_title")}</H2>
-            <p className="text-base text-foreground/80 leading-relaxed mb-6">
-              {t("agents_intro")}
-            </p>
+            {/* Comment on the architecture */}
+            <p>{t("agentic_comment")}</p>
+
+            <h3>{t("agentic_wiring_subhead")}</h3>
+            <ul>
+              {agenticWiringBullets.map((b, i) => (
+                <li key={i}>
+                  <strong>{b.prefix}</strong>
+                  <ul>
+                    {b.sub.map((s, j) => (
+                      <li key={j}>{s}</li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+
+            {/* Workflow code */}
             <CodeBlock language="python · app/agent/agent.py">
               {graphSnippet}
             </CodeBlock>
-            <div className="not-prose grid gap-3 sm:grid-cols-2 my-8">
-              {agents.map((agent) => {
-                const Icon = agent.icon;
-                return (
-                  <article
-                    key={agent.name}
-                    className="rounded-xl border border-border bg-card/60 p-4"
+
+            {/* Agents — grouped grids, animata product-features card style */}
+            <h3>{t("agents_title")}</h3>
+            <p>{t("agents_intro")}</p>
+
+            {(
+              [
+                { roleKey: "agent_role_parser", cols: "sm:grid-cols-2" },
+                { roleKey: "agent_role_recruiter", cols: "sm:grid-cols-3" },
+                { roleKey: "agent_role_candidate", cols: "sm:grid-cols-3" },
+              ] as const
+            ).map(({ roleKey, cols }) => {
+              const roleLabel = t(roleKey);
+              const groupAgents = agents.filter((a) => a.role === roleLabel);
+              return (
+                <div key={roleKey} className="not-prose mt-8">
+                  <h4 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-3 text-center">
+                    {roleLabel}
+                  </h4>
+                  <div
+                    className={`grid gap-4 place-items-stretch ${cols} max-w-3xl mx-auto`}
                   >
-                    <div className="flex items-start justify-between mb-2.5">
-                      <div className="p-1.5 rounded-md bg-muted text-foreground">
-                        <Icon className="size-3.5" />
-                      </div>
-                      <span className="text-[10px] uppercase tracking-wide text-muted-foreground border border-border rounded px-1.5 py-0.5">
-                        {agent.role}
-                      </span>
-                    </div>
-                    <h4 className="font-mono text-sm font-bold text-foreground">
-                      {agent.name}
-                    </h4>
-                    <p
-                      className="font-mono text-[10px] text-primary-sky mb-2"
-                      dir="ltr"
-                    >
-                      → {agent.output}
-                    </p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {agent.description}
-                    </p>
-                  </article>
-                );
-              })}
-            </div>
-
-            {/* API */}
-            <H2 number="05" id="api">{t("api_title")}</H2>
-            <p className="text-base text-foreground/80 leading-relaxed mb-6">
-              {t("api_intro")}
-            </p>
-            <h3 className="text-lg font-bold text-foreground mt-8 mb-2">
-              {t("api_analyze_title")}
-            </h3>
-            <p className="text-sm text-muted-foreground mb-3">
-              {t("api_analyze_desc")}
-            </p>
-            <CodeBlock language="http">{apiSnippet}</CodeBlock>
-            <h3 className="text-lg font-bold text-foreground mt-8 mb-2">
-              {t("api_pdf_title")}
-            </h3>
-            <p className="text-sm text-muted-foreground mb-3">
-              {t("api_pdf_desc")}
-            </p>
-            <CodeBlock language="http">{pdfSnippet}</CodeBlock>
-
-            {/* SCALE */}
-            <H2 number="06" id="scale">{t("scale_title")}</H2>
-            <p className="text-base text-foreground/80 leading-relaxed mb-6">
-              {t("scale_intro")}
-            </p>
-            <div className="not-prose grid gap-3 sm:grid-cols-2 my-6">
-              {scaleBullets.map((item) => (
-                <div
-                  key={item.title}
-                  className="rounded-xl border border-border bg-card/60 p-4"
-                >
-                  <h3 className="text-sm font-bold text-foreground mb-1.5">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {item.desc}
-                  </p>
+                    {groupAgents.map((agent) => {
+                      const Icon = agent.icon;
+                      return (
+                        <article
+                          key={agent.name}
+                          className="group relative flex flex-col h-56 w-full rounded-2xl border border-border bg-gradient-to-br from-primary-sky/5 via-card to-card overflow-hidden p-5 transition-all duration-300 ease-out hover:scale-[1.03] hover:-translate-y-1 hover:shadow-xl hover:shadow-primary-sky/10 hover:border-primary-sky/40"
+                        >
+                          <div className="flex size-10 items-center justify-center rounded-xl bg-primary-sky/15 text-primary-sky mb-3 transition-transform duration-300 group-hover:scale-110">
+                            <Icon className="size-5" />
+                          </div>
+                          <h5 className="font-mono text-sm font-bold text-foreground mb-1">
+                            {agent.name}
+                          </h5>
+                          <p
+                            className="font-mono text-[10px] text-primary-sky mb-2"
+                            dir="ltr"
+                          >
+                            → {agent.output}
+                          </p>
+                          <p className="text-xs text-muted-foreground leading-relaxed flex-1 overflow-hidden">
+                            {agent.description}
+                          </p>
+                        </article>
+                      );
+                    })}
+                  </div>
                 </div>
+              );
+            })}
+
+            {/* 04 SYSTEM DESIGN — backend + frontend justifications */}
+            <H2 number="04" id="system-design">{t("design_kicker")}</H2>
+            <p>{t("design_title")}</p>
+
+            <h3>{t("design_backend_subhead")}</h3>
+            <ul>
+              {designBackendBullets.map((b, i) => (
+                <li key={i}>
+                  <strong>{b.prefix}</strong>: {b.desc}
+                </li>
               ))}
-            </div>
+            </ul>
+            <CodeBlock language="python · app/routes/analyze.py">
+              {fastapiSnippet}
+            </CodeBlock>
+
+            <h3>{t("design_frontend_subhead")}</h3>
+            <ul>
+              {designFrontendBullets.map((b, i) => (
+                <li key={i}>
+                  <strong>{b.prefix}</strong>: {b.desc}
+                </li>
+              ))}
+            </ul>
 
             {/* OBSERVABILITY */}
-            <H2 number="07" id="observability">{t("obs_title")}</H2>
+            <H2 number="05" id="observability">{t("obs_kicker")}</H2>
+            <p className="text-xl md:text-2xl font-medium text-foreground leading-snug mt-4 mb-4">
+              {t("obs_title")}
+            </p>
             <p className="text-base text-foreground/80 leading-relaxed mb-6">
               {t("obs_intro")}
             </p>
-            <div className="not-prose grid gap-3 sm:grid-cols-3 my-6">
+            <CodeBlock language="python · app/routes/analyze.py">
+              {langfuseSnippet}
+            </CodeBlock>
+            <div className="not-prose grid gap-3 md:grid-cols-3 my-8">
               {obsBullets.map((item) => (
                 <div
                   key={item.title}
@@ -538,48 +591,6 @@ file: <pdf binary, max 10 MB>
                     {item.desc}
                   </p>
                 </div>
-              ))}
-            </div>
-
-            {/* FRONTEND */}
-            <H2 number="08" id="frontend">{t("frontend_title")}</H2>
-            <p className="text-base text-foreground/80 leading-relaxed mb-6">
-              {t("frontend_intro")}
-            </p>
-            <div className="not-prose grid gap-3 sm:grid-cols-3 my-6">
-              {frontendBullets.map((item) => (
-                <div
-                  key={item.title}
-                  className="rounded-xl border border-border bg-card/60 p-4"
-                >
-                  <h3 className="text-sm font-bold text-foreground mb-1.5">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {item.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* STACK */}
-            <H2 number="09" id="stack">{t("stack_title")}</H2>
-            <p className="text-base text-foreground/80 leading-relaxed mb-6">
-              {t("stack_intro")}
-            </p>
-            <div className="not-prose flex flex-wrap gap-2 my-6">
-              {techStack.map((item) => (
-                <span
-                  key={item.name}
-                  className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg border border-border bg-card/60 text-foreground"
-                >
-                  <img
-                    src={logoUrl(item.domain)}
-                    alt={item.name}
-                    className="size-3.5 rounded-sm"
-                  />
-                  {item.name}
-                </span>
               ))}
             </div>
 
@@ -602,10 +613,74 @@ file: <pdf binary, max 10 MB>
                 </ShimmerLink>
               </div>
             </div>
+            </div>
           </div>
-        </article>
-      </main>
+        </main>
+
+        {/* RIGHT ASIDE — sticky TOC + preview card (magicui pattern) */}
+        <aside className="hidden lg:block w-[350px] flex-shrink-0 p-6 lg:p-10 bg-muted/60 dark:bg-muted/20">
+          <div className="sticky top-20 space-y-6">
+            {/* AUTHOR CARD (magicui pattern) */}
+            <div className="flex items-start gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/photo.jpg"
+                alt={tHero("name")}
+                className="rounded-full w-10 h-10 border border-border object-cover shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm tracking-tight text-balance font-semibold text-foreground">
+                  {tHero("name")}
+                </h3>
+                <p className="text-xs text-muted-foreground text-balance">
+                  {tHero("role")}
+                </p>
+              </div>
+            </div>
+
+            <div className="border border-border rounded-lg p-6 bg-card">
+              <TableOfContents items={tocItems} title={t("toc_title")} />
+            </div>
+            <a
+              href={LIVE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative block overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:border-primary-sky/40 hover:shadow-lg hover:shadow-primary-sky/5"
+            >
+              <div className="relative w-full aspect-[16/10] overflow-hidden bg-muted">
+                <Image
+                  src="/projects/career-copilot.png"
+                  alt={t("title")}
+                  fill
+                  sizes="350px"
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                />
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"
+                />
+                <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-background/85 backdrop-blur-sm border border-border text-[10px] font-medium uppercase tracking-wider text-foreground">
+                  <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Live
+                </span>
+              </div>
+              <div className="p-4 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <h4 className="text-sm font-semibold text-foreground truncate">
+                    {tProjects("try_it")}
+                  </h4>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 truncate font-mono">
+                    career-copilot.najinajari.com
+                  </p>
+                </div>
+                <ArrowUpRight className="size-4 text-muted-foreground shrink-0 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary-sky" />
+              </div>
+            </a>
+          </div>
+        </aside>
+      </div>
+
       <Footer />
-    </>
+    </div>
   );
 }

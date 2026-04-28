@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
@@ -100,7 +102,7 @@ export default async function LocaleLayout({
 
   const cookieStore = await cookies();
   const initialTheme = parseThemeCookie(cookieStore.get(THEME_COOKIE)?.value);
-  const htmlClass = `font-sans${initialTheme === "dark" ? " dark" : ""}`;
+  const htmlClass = `${GeistSans.variable} ${GeistMono.variable} font-sans${initialTheme === "dark" ? " dark" : ""}`;
 
   return (
     <html
