@@ -74,10 +74,10 @@
     "toc_title": "في هذه الصفحة",
     "title": "Career Copilot",
     "tagline": "ألصق سيرة ذاتية ووصف وظيفة. يحصل المُجنِّدون على حكم ملاءمة ورسالة تواصل تستحق الإرسال. يحصل المرشحون على ملف عن الشركة وتحضير مقابلة مخصص.",
-    "problem_kicker": "المشكلة",
-    "solution_kicker": "الحل",
+    "problem_kicker": "الهدف",
+    "solution_kicker": "حالة الاستخدام",
     "design_kicker": "تصميم النظام",
-    "agentic_kicker": "وكيلي",
+    "agentic_kicker": "الهيكلية الوكيلية",
     "obs_kicker": "القابلية للمراقبة",
     "arch_kicker": "المعمارية",
     "agents_kicker": "الوكلاء",
@@ -85,10 +85,56 @@
     "scale_kicker": "الهندسة",
     "frontend_kicker": "الواجهة الأمامية",
     "stack_kicker": "Stack",
-    "design_title": "ثلاث طبقات بدون state، ورسم بياني واحد.",
-    "design_intro": "متصفّح يطلب واجهة Next.js 15 / React 19. الواجهة ترسل CV + JD إلى endpoint FastAPI بدون state. الخادم يطلق Workflow على Google ADK v2، ينتظر الاستجابة المكتوبة، ويعيدها. لا شيء مشترك بين الطلبات، لذلك تتوسع كل طبقة أفقياً دون تنسيق، وأي instance يخدم أي طلب.",
-    "agentic_title": "داخل الرسم البياني متعدد الوكلاء.",
-    "agentic_intro": "التنسيق هو تعريف Workflow واحد. Edges تصف فروعاً متوازية (tuples)، توجيهاً شرطياً (FunctionNode + dict mapping)، ومزامنة fan-in (JoinNodes). الحتمية تأتي من state مكتوب يمر بين النودات؛ لا شيء يعتمد على parsing strings، ولا شيء يعبر حدود LLM دون نوع.",
+    "design_title": "الرسم البياني الوكيلي أعلاه لا يُطلَق إلا إذا كان مكشوفاً عبر API بدون state ومتاحاً من واجهة. طبقتان نظيفتان تقومان بذلك دون تسريب التعقيد إلى الرسم البياني.",
+    "design_backend_subhead": "Backend",
+    "design_backend_bullets": [
+      { "prefix": "FastAPI يكشف الرسم البياني", "desc": "اثنان من endpoints POST بدون state (/v1/analyze، /v1/extract-pdf). Schema OpenAPI مُولَّد تلقائياً وتكامل Pydantic أصلي." },
+      { "prefix": "Async من البداية للنهاية", "desc": "FastAPI زائد runner async من ADK، لذا الفروع المتوازية في الرسم البياني تشتغل فعلاً بالتوازي." },
+      { "prefix": "جاهز للحاويات", "desc": "Dockerfile واحد، lockfile من uv. يُنشَر بشكل متطابق على Cloud Run، Fly.io، أو HuggingFace Spaces." }
+    ],
+    "design_frontend_subhead": "Frontend",
+    "design_frontend_bullets": [
+      { "prefix": "عميل Next.js 15 رفيع", "desc": "يجمع المُدخَلات، POST إلى /v1/analyze، يعرض الاستجابة المكتوبة. كل business logic تبقى في الرسم البياني الـ backend." },
+      { "prefix": "TanStack Query لاستدعاء analyze", "desc": "useMutation يدفع الـ flow؛ toasts Sonner تُبرز الأخطاء المهيكلة 502 / 422 من الـ backend." },
+      { "prefix": "Forms مُتحقَّق منها بـ Zod", "desc": "analyzeInputSchema واحد للوضعَين. الصق نصاً أو ارفع PDF (يمر عبر /v1/extract-pdf أولاً)." }
+    ],
+    "design_intro_unused": "متصفّح يطلب واجهة Next.js 15 / React 19. الواجهة ترسل CV + JD إلى endpoint FastAPI بدون state. الخادم يطلق Workflow على Google ADK v2، ينتظر الاستجابة المكتوبة، ويعيدها.",
+    "agentic_comment": "الرسم البياني يُرمّز فصلاً متعمَّداً بين control flow حتمي وتوليد مدفوع بـ LLM. التوجيه والمزامنة يبقيان في pure Python؛ فقط التوليد يعبر حدود LLM، وكل مخرج مُقيَّد بـ schema من Pydantic قبل أن يغادر النود.",
+    "agentic_wiring_subhead": "كيف الرسم البياني مُوصَّل",
+    "agentic_wiring_bullets": [
+      {
+        "prefix": "Control flow يبقى خارج الـ LLMs",
+        "sub": [
+          "اثنان من FunctionNode routers (mode_router، verdict_router) يقرران الفروع في pure Python على state مكتوب مسبقاً.",
+          "JoinNodes تنتظر اكتمال الفروع المتوازية قبل التشغيل في المراحل التالية.",
+          "لا يقرر أي LLM أبداً أي فرع يُطلَق تالياً، مما يُزيل فئة كاملة من failure modes من المسار الحرج."
+        ]
+      },
+      {
+        "prefix": "ثمانية وكلاء متخصصون، schema لكل واحد",
+        "sub": [
+          "كل وكيل يعلن output_schema الخاص به: ParsedCV، ParsedJD، FitVerdict، OutreachDraft، GapReport، CompanyIntelligence، CVOptimizationBundle، InterviewPrepBundle."
+        ]
+      },
+      {
+        "prefix": "طوبولوجيتا فروع على نفس المُدخلات المُحلَّلة",
+        "sub": [
+          "فرع المُجنِّد: سلسلة خطية مع split شرطي واحد على fit verdict (fit / borderline → outreach، no_fit → gap report).",
+          "فرع المرشح: البحث وتموضع السيرة الذاتية fan-out بالتوازي، يتزامنان عبر JoinNode، ثم يغذيان interview prep.",
+          "التوازي على جانب المرشح آمن لأن المسارَين ليس بينهما أي تبعية بيانات."
+        ]
+      },
+      {
+        "prefix": "مخرج هروبي لاستخدام الأدوات",
+        "sub": [
+          "ADK لا يسمح حالياً بدمج output_schema مع tools على gpt-5.4-mini.",
+          "Research Agent يستخدم toolset Tavily MCP ويُصدر payload CompanyIntelligence كـ JSON string.",
+          "الـ handler يتحقق منه بـ model_validate_json عند حدود الـ API، مع الحفاظ على invariant typed-state عند الحافة."
+        ]
+      }
+    ],
+    "agentic_title_unused": "داخل الرسم البياني متعدد الوكلاء.",
+    "agentic_intro_unused": "التنسيق هو تعريف Workflow واحد. Edges تصف فروعاً متوازية (tuples)، توجيهاً شرطياً (FunctionNode + dict mapping)، ومزامنة fan-in (JoinNodes).",
     "agentic_decisions_title": "قرارات التصميم",
     "agentic_decisions": [
       {
@@ -116,14 +162,29 @@
         "desc": "Reasoning effort منخفض افتراضياً للحفاظ على تكلفة قابلة للتنبؤ. Outreach Writer هو الوكيل الوحيد المرفوع إلى medium، حيث جودة الرسالة تصنع الفرق."
       }
     ],
-    "problem_title": "مشروع جانبي لاستعراض stack أردت إتقانها من البداية للنهاية: Google ADK v2 graphs، FastAPI، Tavily MCP، Langfuse. مطابقة CV × JD هو المجال المختار لأن الاختصارات فيه تنكسر بطرق ممتعة.",
+    "problem_title": "Google ADK v2 أطلق مؤخراً API الـ workflow القائم على الرسم البياني. أردت دفعه end-to-end على حالة استخدام حقيقية، بروح LangGraph.",
+    "problem_subhead": "لماذا رسم بياني",
     "problem_bullets": [
-      "نماذج LLM في single-prompt تهلوس إما خبرة المرشح أو وضع الشركة. القارئ يلاحظ ذلك من القراءة الأولى.",
-      "بدون بحث مباشر، تحضير المرشح يبقى عاماً. بدون عقود مكتوبة، رسائل المُجنِّد تنحرف. بدون tracing، يستحيل معرفة لماذا فشل تشغيل محدد.",
-      "ما يُعرض هنا هو التنسيق: parsers بالتوازي، routers حتمية، وكيل يستدعي Tavily عبر MCP، مخرجات Pydantic عند كل حدود node، spans Langfuse للتشغيل الكامل."
+      { "prefix": "طوبولوجيا صريحة", "desc": "النودات والـ edges والفروع المتوازية والتوجيه الشرطي ونقاط المزامنة كلها مكوّنات first-class." },
+      { "prefix": "وحدات قابلة للاختبار", "desc": "كل نود يمكن اختباره وحدة، استبداله، أو تتبّعه بمفرده." },
+      { "prefix": "State مكتوب", "desc": "عقود في كل خطوة بدلاً من parsing prompts بصيغة حرة." },
+      { "prefix": "تكلفة قابلة للتنبؤ", "desc": "تعرف مسبقاً ما هي الخطوات التي تشتغل، بأي ترتيب، وأي نموذج يخدم كل واحدة." }
     ],
-    "modes_title": "وضعان، أداة واحدة",
-    "modes_intro": "اختر من أنت. نفس السيرة الذاتية والوظيفة تقود إلى إجابات مختلفة جداً.",
+    "modes_title": "ارفع سيرة ذاتية ووصف وظيفة. خط أنابيب من الوكلاء يقوم بالتحليل الكامل ويُنتج مخرجات مخصّصة للجانب الذي يطرح السؤال من حلقة التوظيف، مُجنِّد أو مرشح.",
+    "modes_subhead": "ما يفعله",
+    "modes_bullets": [
+      { "prefix": "معالجة مسبقة مشتركة", "desc": "السيرة الذاتية ووصف الوظيفة يُحلَّلان بالتوازي إلى كائنات مكتوبة (مهارات، سنوات الخبرة، إنجازات، مطلوب مقابل مفضّل، مستوى). كل التفرّع يحدث بعد التحليل." },
+      { "prefix": "مسار المُجنِّد", "desc": "يقيّم مدى ملاءمة المرشح للدور (fit أو borderline أو no fit)، ثم إما يصوغ رسالة LinkedIn تستشهد بإنجاز حقيقي من السيرة الذاتية، أو يشرح الفجوات ويقترح أدواراً مماثلة." },
+      { "prefix": "مسار المرشح", "desc": "بحث مباشر عن الشركة عبر Tavily MCP (التمويل، الثقافة، الأخبار الحديثة)، اقتراحات تموضع للسيرة الذاتية مُكيَّفة مع الوظيفة، وحزمة تحضير مقابلة بأسئلة محتملة ونقاط حوار." }
+    ],
+    "modes_graph_subhead": "لماذا نحتاج رسماً بيانياً",
+    "modes_graph_bullets": [
+      { "prefix": "عمل مشترك، مخرجات متباعدة", "desc": "كلا المسارين يعيدان استخدام نفس CV وJD المُحلَّلَين، ثم ينتجان قطعاً مختلفة تماماً. وكيل single big-prompt سيحتاج إلى prompt شرطي متشعّب؛ الرسم البياني يجعل الفصل طبيعياً." },
+      { "prefix": "التوازي يقسم زمن الاستجابة إلى النصف", "desc": "تحليل CV وJD بالتوازي، ثم على جانب المرشح تشغيل البحث وتموضع السيرة الذاتية بالتوازي. سلسلة خطية ستفرض هذه الخطوات أن تعمل واحدة تلو الأخرى." },
+      { "prefix": "التفرّع يجب أن يكون حتمياً", "desc": "التوجيه على fit verdict (fit أو borderline → outreach، no_fit → gap explainer) لا يمكن أن يعتمد على LLM يعيد parsing مخرجاته. FunctionNode router يقرر في pure Python على verdict مكتوب." },
+      { "prefix": "لماذا هذا المجال يناسب", "desc": "صغير بما يكفي لإطلاقه كمشروع جانبي، حقيقي بما يكفي لكشف failure modes، غني بما يكفي لاحتياج كل واحدة من الـ affordances أعلاه." }
+    ],
+    "modes_intro_unused": "اختر من أنت. نفس السيرة الذاتية والوظيفة تقود إلى إجابات مختلفة جداً.",
     "recruiter_title": "وضع المُجنِّد",
     "recruiter_desc": "اعرف في ثوانٍ ما إذا كان المرشح يناسب الدور. إذا ناسب، احصل على رسالة LinkedIn لا تبدو كقالب.",
     "recruiter_bullets": [

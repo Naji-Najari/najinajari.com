@@ -88,18 +88,16 @@ export default function Projects() {
 
                   {/* Content */}
                   <div className="p-6 flex flex-col flex-1 gap-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-base font-bold text-foreground">
+                    <Link
+                      href={project.detailHref}
+                      aria-label={`${project.title} · ${t("read_more")}`}
+                      className="group/title flex items-start justify-between gap-2"
+                    >
+                      <h3 className="text-base font-bold text-foreground transition-colors group-hover/title:text-primary-sky">
                         {project.title}
                       </h3>
-                      <Link
-                        href={project.detailHref}
-                        aria-label={`${project.title} · ${t("read_more")}`}
-                        className="text-muted-foreground hover:text-primary-sky transition-colors shrink-0"
-                      >
-                        <ArrowUpRight className="size-4" />
-                      </Link>
-                    </div>
+                      <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-colors group-hover/title:text-primary-sky" />
+                    </Link>
 
                     <p className="text-sm text-muted-foreground leading-relaxed flex-1">
                       {project.description}

@@ -74,10 +74,10 @@
     "toc_title": "Sur cette page",
     "title": "Career Copilot",
     "tagline": "Colle un CV et une offre. Les recruteurs obtiennent un verdict de fit et un outreach qui vaut le coup d'être envoyé. Les candidats obtiennent un brief sur l'entreprise et une préparation d'entretien sur mesure.",
-    "problem_kicker": "Problème",
-    "solution_kicker": "Solution",
+    "problem_kicker": "Objectif",
+    "solution_kicker": "Cas d'usage",
     "design_kicker": "Conception système",
-    "agentic_kicker": "Agentique",
+    "agentic_kicker": "Architecture agentique",
     "obs_kicker": "Observabilité",
     "arch_kicker": "Architecture",
     "agents_kicker": "Agents",
@@ -85,10 +85,56 @@
     "scale_kicker": "Ingénierie",
     "frontend_kicker": "Frontend",
     "stack_kicker": "Stack",
-    "design_title": "Trois couches stateless, un seul graphe.",
-    "design_intro": "Un navigateur tape sur un frontend Next.js 15 / React 19. Le frontend poste CV + offre vers un endpoint FastAPI stateless. Le backend lance un Workflow Google ADK v2, attend la réponse typée, et la renvoie. Rien n'est partagé entre les requêtes, donc chaque couche scale horizontalement sans coordination, et n'importe quelle instance peut servir n'importe quelle requête.",
-    "agentic_title": "Au cœur du graphe multi-agents.",
-    "agentic_intro": "L'orchestration est une seule définition Workflow. Les edges décrivent des branches parallèles (tuples), du routage conditionnel (FunctionNode + dict mapping), et la synchronisation fan-in (JoinNodes). Le déterminisme vient du state typé qui passe entre les nodes ; rien ne dépend du parsing de strings, rien ne traverse une frontière LLM en non-typé.",
+    "design_title": "Le graphe agentique ci-dessus ne ship que s'il est exposé via une API stateless et atteignable depuis une UI. Deux couches propres font ça sans laisser fuir la complexité dans le graphe.",
+    "design_backend_subhead": "Backend",
+    "design_backend_bullets": [
+      { "prefix": "FastAPI expose le graphe", "desc": "deux endpoints POST stateless (/v1/analyze, /v1/extract-pdf). Schema OpenAPI auto-généré et intégration Pydantic native." },
+      { "prefix": "Async de bout en bout", "desc": "FastAPI plus le runner async d'ADK, donc les branches parallèles du graphe tournent vraiment en parallèle." },
+      { "prefix": "Container-ready", "desc": "un seul Dockerfile, lockfile uv. Déploie identique sur Cloud Run, Fly.io ou HuggingFace Spaces." }
+    ],
+    "design_frontend_subhead": "Frontend",
+    "design_frontend_bullets": [
+      { "prefix": "Client Next.js 15 thin", "desc": "collecte les inputs, POST vers /v1/analyze, render la réponse typée. Toute la business logic reste dans le graphe backend." },
+      { "prefix": "TanStack Query pour l'appel analyze", "desc": "useMutation drive le flow ; les toasts Sonner surface les erreurs structurées 502 / 422 du backend." },
+      { "prefix": "Forms validés par Zod", "desc": "un seul analyzeInputSchema pour les deux modes. Coller du texte ou uploader un PDF (qui passe par /v1/extract-pdf d'abord)." }
+    ],
+    "design_intro_unused": "Un navigateur tape sur un frontend Next.js 15 / React 19. Le frontend poste CV + offre vers un endpoint FastAPI stateless. Le backend lance un Workflow Google ADK v2, attend la réponse typée, et la renvoie.",
+    "agentic_comment": "Le graphe encode une séparation délibérée entre control flow déterministe et génération LLM. Routage et synchronisation restent en pure Python ; seule la génération franchit une frontière LLM, et chaque sortie est contrainte par un schema Pydantic avant de quitter le node.",
+    "agentic_wiring_subhead": "Comment le graphe est câblé",
+    "agentic_wiring_bullets": [
+      {
+        "prefix": "Le control flow reste hors des LLMs",
+        "sub": [
+          "Deux FunctionNode routers (mode_router, verdict_router) décident des branches en pure Python sur du state déjà typé.",
+          "Les JoinNodes attendent que les branches parallèles se complètent avant de fire en aval.",
+          "Aucun LLM ne décide quelle branche fire ensuite, ce qui supprime une classe entière de failure modes du chemin critique."
+        ]
+      },
+      {
+        "prefix": "Huit agents spécialisés, un schema chacun",
+        "sub": [
+          "Chaque agent déclare son propre output_schema : ParsedCV, ParsedJD, FitVerdict, OutreachDraft, GapReport, CompanyIntelligence, CVOptimizationBundle, InterviewPrepBundle."
+        ]
+      },
+      {
+        "prefix": "Deux topologies de branches sur les mêmes inputs parsés",
+        "sub": [
+          "Branche recruteur : chaîne linéaire avec un split conditionnel sur le fit verdict (fit / borderline → outreach, no_fit → gap report).",
+          "Branche candidat : recherche et positionnement CV fan-out en parallèle, synchronisent via un JoinNode, puis alimentent l'interview prep.",
+          "Le parallélisme côté candidat est safe parce que les deux passes n'ont aucune dépendance de données entre elles."
+        ]
+      },
+      {
+        "prefix": "Une échappatoire pour le tool use",
+        "sub": [
+          "ADK ne permet actuellement pas de combiner output_schema avec des tools sur gpt-5.4-mini.",
+          "Le Research Agent utilise le toolset Tavily MCP et émet son payload CompanyIntelligence en JSON string.",
+          "Le handler le valide avec model_validate_json à la frontière API, préservant l'invariant typed-state au bord."
+        ]
+      }
+    ],
+    "agentic_title_unused": "Au cœur du graphe multi-agents.",
+    "agentic_intro_unused": "L'orchestration est une seule définition Workflow. Les edges décrivent des branches parallèles (tuples), du routage conditionnel (FunctionNode + dict mapping), et la synchronisation fan-in (JoinNodes).",
     "agentic_decisions_title": "Décisions de design",
     "agentic_decisions": [
       {
@@ -116,14 +162,29 @@
         "desc": "Reasoning effort low par défaut pour garder le coût prédictible. Seul l'Outreach Writer monte à medium, là où la qualité du message fait la différence sur un recruteur qui clique vraiment sur envoyer."
       }
     ],
-    "problem_title": "Side project pour pousser une stack que je voulais maîtriser de bout en bout : Google ADK v2 graphs, FastAPI, Tavily MCP, Langfuse. CV × Offre est le domaine choisi parce que les raccourcis y cassent de manière intéressante.",
+    "problem_title": "Google ADK v2 vient de sortir son API workflow basée sur un graphe. Je voulais la pousser de bout en bout sur un cas d'usage réel, dans l'esprit de LangGraph.",
+    "problem_subhead": "Pourquoi un graphe",
     "problem_bullets": [
-      "Les LLMs en single-prompt hallucinent soit l'expérience du candidat, soit la situation de l'entreprise. Le lecteur le repère à la première lecture.",
-      "Sans recherche live, la prépa candidat reste générique. Sans contrats typés, l'outreach recruteur dérive. Sans tracing, impossible de dire pourquoi un run précis a échoué.",
-      "Ce qui est montré ici c'est l'orchestration : parsers en parallèle, routers déterministes, un agent qui appelle Tavily via MCP, des sorties Pydantic à chaque frontière de node, des spans Langfuse pour le run complet."
+      { "prefix": "Topologie explicite", "desc": "nodes, edges, branches parallèles, routage conditionnel et points de synchro sont first-class." },
+      { "prefix": "Unités testables", "desc": "chaque node peut être testé unitairement, swappé, ou tracé indépendamment." },
+      { "prefix": "State typé", "desc": "des contrats à chaque étape au lieu de parsing de prompts en free-form." },
+      { "prefix": "Coût prédictible", "desc": "on sait à l'avance quelles étapes tournent, dans quel ordre, et quel modèle sert chacune." }
     ],
-    "modes_title": "Deux modes, un seul outil",
-    "modes_intro": "Choisis qui tu es. Le même CV et la même offre mènent à des réponses très différentes.",
+    "modes_title": "Upload un CV et une description de poste. Un pipeline d'agents fait l'analyse complète et produit une sortie adaptée au côté de la boucle de recrutement qui pose la question, recruteur ou candidat.",
+    "modes_subhead": "Ce que ça fait",
+    "modes_bullets": [
+      { "prefix": "Préprocessing partagé", "desc": "le CV et l'offre sont parsés en parallèle en objets typés (compétences, années d'expérience, réalisations, requis vs préférés, séniorité). Tout le branching arrive après le parsing." },
+      { "prefix": "Flux recruteur", "desc": "score le fit du candidat (fit, borderline, ou no fit), puis soit drafte un message LinkedIn citant une vraie réalisation du CV, soit explique les gaps et suggère des postes adjacents." },
+      { "prefix": "Flux candidat", "desc": "recherche live sur l'entreprise via Tavily MCP (levée, culture, news récentes), suggestions de positionnement CV adaptées à l'offre, et un pack de prep d'entretien avec questions probables et talking points." }
+    ],
+    "modes_graph_subhead": "Pourquoi on a besoin d'un graphe",
+    "modes_graph_bullets": [
+      { "prefix": "Travail partagé, sorties divergentes", "desc": "les deux flux réutilisent le même CV et la même offre parsés, puis produisent des artefacts complètement différents. Un agent single big-prompt aurait besoin d'un prompt conditionnel tentaculaire ; un graphe rend la séparation naturelle." },
+      { "prefix": "Le parallélisme divise la latence par deux", "desc": "parsing du CV et de l'offre en concurrence, puis côté candidat la recherche et le positionnement CV en parallèle. Une chaîne linéaire forcerait ces étapes à tourner les unes après les autres." },
+      { "prefix": "Le branching doit être déterministe", "desc": "le routage sur le fit verdict (fit ou borderline → outreach, no_fit → gap explainer) ne peut pas dépendre d'un LLM qui re-parse sa propre sortie. Un FunctionNode router décide en pure Python sur un verdict typé." },
+      { "prefix": "Pourquoi ce domaine colle", "desc": "assez petit pour shipper en side project, assez réel pour exposer les failure modes, assez riche pour avoir besoin de toutes les affordances ci-dessus." }
+    ],
+    "modes_intro_unused": "Choisis qui tu es. Le même CV et la même offre mènent à des réponses très différentes.",
     "recruiter_title": "Mode recruteur",
     "recruiter_desc": "Sache en quelques secondes si le candidat colle au poste. S'il colle, obtiens un message LinkedIn qui ne ressemble pas à un template.",
     "recruiter_bullets": [
