@@ -316,7 +316,7 @@ async def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
 
       {/* HEADER section (full-width, border-b, magicui pattern) */}
       <div className="space-y-4 border-b border-border relative z-10 pt-20">
-        <div className="max-w-7xl mx-auto flex flex-col gap-6 p-6">
+        <div className="max-w-7xl mx-auto flex flex-col gap-6 px-6 pt-6 pb-14 md:pb-20">
           {/* Back button alone, left-aligned */}
           <Link
             href={`/${locale}#projects`}
